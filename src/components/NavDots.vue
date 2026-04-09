@@ -22,10 +22,12 @@ const isDesktop = useMediaQuery('(min-width: 1024px)')
 const activeSection = ref('')
 
 const sections = [
+  { id: 'hero', label: 'Lobby' },
+  { id: 'experience', label: 'Rooms' },
   { id: 'story', label: 'Brand Story' },
-  { id: 'vehicles', label: 'Vehicles' },
-  { id: 'performance', label: 'Performance' },
-  { id: 'challenge', label: '0-100 Challenge' },
+  { id: 'reveal', label: 'Reveal Chamber' },
+  { id: 'mystery', label: 'Mystery Room' },
+  { id: 'challenge', label: 'Speed Room' },
   { id: 'quiz', label: 'Quiz' },
   { id: 'signup', label: 'Sign Up' },
 ]

@@ -149,6 +149,7 @@
             <MagneticButton type="submit" class="speed__submit-btn">
               Save Score
             </MagneticButton>
+            <p v-if="submitError" class="speed__submit-error">{{ submitError }}</p>
           </form>
           <div v-else class="speed__submitted-wrap">
             <p class="speed__submitted-msg">Score saved! Check the leaderboard below.</p>
@@ -185,6 +186,7 @@
             </svg>
             This Week's Fastest
           </h3>
+          <p class="speed__lb-week">{{ leaderboardLabel }}</p>
           <div class="speed__lb-list">
             <div
               v-for="(entry, i) in leaderboard"
@@ -210,7 +212,7 @@
               <span class="speed__lb-score">{{ entry.score }}ms</span>
             </div>
             <p v-if="leaderboard.length === 0" class="speed__lb-empty">
-              No scores yet â€” be the first!
+              No scores yet - be the first!
             </p>
           </div>
         </div>
@@ -238,6 +240,9 @@ const scoreSubmitted = ref(false)
 const leaderboard = ref([])
 const particlesEl = ref(null)
 const copiedShare = ref(false)
+const submitError = ref('')
+
+const WEEKLY_BOARD_KEY = 'avatr-weekly-leaderboard'
 
 let lightTimers = []
 let goTimeout = null
@@ -260,11 +265,13 @@ const resultLabel = computed(() => {
 const resultMessage = computed(() => {
   const ms = reactionTime.value
   if (ms < 200) return 'Incredible! F1 driver-level reflexes!'
-  if (ms < 250) return 'Blazing fast â€” you\'re a natural!'
+  if (ms < 250) return 'Blazing fast - you are a natural!'
   if (ms < 300) return 'Excellent reaction. Try again to break 250ms!'
   if (ms < 400) return 'Solid start! Most people are in this range.'
-  return 'Don\'t worry â€” reaction time improves with practice!'
+  return 'Do not worry - reaction time improves with practice!'
 })
+
+const leaderboardLabel = computed(() => `Week of ${getWeekLabel()}`)
 
 const resultTier = computed(() => {
   const ms = reactionTime.value
@@ -338,6 +345,38 @@ function resetGame() {
   scoreSubmitted.value = false
   carLaunched.value = false
   copiedShare.value = false
+  submitError.value = ''
+}
+
+function getWeekKey() {
+  const now = new Date()
+  const day = (now.getDay() + 6) % 7
+  const monday = new Date(now)
+  monday.setDate(now.getDate() - day)
+  monday.setHours(0, 0, 0, 0)
+  return monday.toISOString().slice(0, 10)
+}
+
+function getWeekLabel() {
+  const monday = new Date(getWeekKey())
+  return monday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function readLocalBoard() {
+  try {
+    const raw = localStorage.getItem(`${WEEKLY_BOARD_KEY}:${getWeekKey()}`)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function writeLocalBoard(entries) {
+  try {
+    localStorage.setItem(`${WEEKLY_BOARD_KEY}:${getWeekKey()}`, JSON.stringify(entries))
+  } catch {
+    // ignore localStorage failures
+  }
 }
 
 function clearAllTimers() {
@@ -364,6 +403,13 @@ function particleStyle(i) {
 }
 
 async function submitScore() {
+  submitError.value = ''
+
+  if (reactionTime.value < 90) {
+    submitError.value = 'That score is too fast to validate. Try again.'
+    return
+  }
+
   try {
     if (API.sheetsEndpoint) {
       await fetch(API.sheetsEndpoint, {
@@ -383,9 +429,14 @@ async function submitScore() {
     leaderboard.value.push({ name: playerName.value, score: String(reactionTime.value) })
     leaderboard.value.sort((a, b) => parseFloat(a.score) - parseFloat(b.score))
     leaderboard.value = leaderboard.value.slice(0, 10)
+    writeLocalBoard(leaderboard.value)
     window.__avatrSound?.playWhoosh()
   } catch {
     scoreSubmitted.value = true
+    leaderboard.value.push({ name: playerName.value, score: String(reactionTime.value) })
+    leaderboard.value.sort((a, b) => parseFloat(a.score) - parseFloat(b.score))
+    leaderboard.value = leaderboard.value.slice(0, 10)
+    writeLocalBoard(leaderboard.value)
   }
 }
 
@@ -422,7 +473,8 @@ async function shareScore() {
 
 async function fetchLeaderboard() {
   if (!API.sheetsEndpoint) {
-    leaderboard.value = [
+    const localBoard = readLocalBoard()
+    leaderboard.value = localBoard.length ? localBoard : [
       { name: 'Ahmad K.', score: '187' },
       { name: 'Sara M.', score: '215' },
       { name: 'Khaled R.', score: '238' },
@@ -436,8 +488,11 @@ async function fetchLeaderboard() {
     const data = await res.json()
     if (Array.isArray(data)) {
       leaderboard.value = data.slice(0, 10)
+      writeLocalBoard(leaderboard.value)
     }
-  } catch { /* empty */ }
+  } catch {
+    leaderboard.value = readLocalBoard()
+  }
 }
 
 onMounted(() => {
@@ -470,6 +525,22 @@ onUnmounted(() => {
 
 .speed__share-btn {
   min-width: 180px;
+}
+
+.speed__submit-error {
+  font-size: 0.74rem;
+  color: #ff8e8e;
+  letter-spacing: 0.04em;
+}
+
+.speed__lb-week {
+  margin-top: -8px;
+  margin-bottom: 14px;
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-muted);
 }
 
 /* â”€â”€ Prize Banner â”€â”€ */

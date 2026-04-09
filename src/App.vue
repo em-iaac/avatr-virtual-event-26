@@ -7,14 +7,19 @@
   <NavDots />
   <CursorGlow />
   <SoundManager />
+  <VirtualHost />
 
   <div id="smooth-wrapper">
     <HeroSection />
     <SectionDivider variant="line" />
-    <BrandStory />
+    <ExperienceRooms />
     <SectionDivider variant="diamond" />
+    <BrandStory />
+    <SectionDivider variant="line" />
     <CarReveal />
     <SectionDivider variant="dots" />
+    <MysteryRoom />
+    <SectionDivider variant="diamond" />
     <PerformanceStats />
     <SectionDivider variant="line" />
     <SpeedChallenge />
@@ -39,9 +44,12 @@ import FloatingDiamonds from './components/FloatingDiamonds.vue'
 import NavDots from './components/NavDots.vue'
 import CursorGlow from './components/CursorGlow.vue'
 import SoundManager from './components/SoundManager.vue'
+import VirtualHost from './components/VirtualHost.vue'
 import HeroSection from './components/HeroSection.vue'
+import ExperienceRooms from './components/ExperienceRooms.vue'
 import BrandStory from './components/BrandStory.vue'
 import CarReveal from './components/CarReveal.vue'
+import MysteryRoom from './components/MysteryRoom.vue'
 import VehicleLineup from './components/VehicleLineup.vue'
 import PerformanceStats from './components/PerformanceStats.vue'
 import SpeedChallenge from './components/SpeedChallenge.vue'
