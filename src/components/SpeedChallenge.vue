@@ -1,161 +1,134 @@
-<template>
+﻿<template>
   <section class="speed section" id="challenge">
     <div class="section__inner">
       <SectionHeading
-        title="0–100 Challenge"
-        subtitle="How fast can you launch the AVATR?"
+        title="Reaction Challenge"
+        subtitle="Test your reflexes â€” how fast can you launch?"
       />
 
-      <div class="speed__arena" :class="{ 'speed__arena--shake': shaking }">
-        <!-- Edge glow that intensifies with speed -->
-        <div class="speed__edge-glow" :style="{ opacity: currentSpeed / 150 }"></div>
+      <!-- Prize Banner -->
+      <div class="speed__prize-banner">
+        <div class="speed__prize-inner">
+          <svg class="speed__prize-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L15 8.5L22 9.5L17 14.5L18 21.5L12 18L6 21.5L7 14.5L2 9.5L9 8.5Z"/>
+          </svg>
+          <div class="speed__prize-text">
+            <span class="speed__prize-label">Win a Mystery Box</span>
+            <span class="speed__prize-sub">Top 3 fastest reactions this week win!</span>
+          </div>
+          <svg class="speed__prize-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L15 8.5L22 9.5L17 14.5L18 21.5L12 18L6 21.5L7 14.5L2 9.5L9 8.5Z"/>
+          </svg>
+        </div>
+      </div>
 
-        <!-- Carbon fiber texture bg -->
-        <div class="speed__carbon-bg"></div>
+      <div class="speed__arena">
+        <!-- Glass shine -->
+        <div class="speed__arena-shine"></div>
 
         <!-- IDLE state -->
         <div v-if="state === 'idle'" class="speed__idle">
           <div class="speed__idle-visual">
-            <!-- Car silhouette SVG -->
-            <svg class="speed__car-icon" viewBox="0 0 200 60" fill="none">
+            <div class="speed__lights-preview">
+              <span v-for="i in 5" :key="i" class="speed__light-preview"></span>
+            </div>
+          </div>
+          <h3 class="speed__idle-title">F1-Style Start</h3>
+          <p class="speed__instructions">
+            Watch the lights. When they all go out â€” tap as fast as you can!<br/>
+            Your reaction time is measured in milliseconds.
+          </p>
+          <MagneticButton class="speed__start-btn" @click="startGame">
+            Ready Up
+          </MagneticButton>
+        </div>
+
+        <!-- COUNTDOWN state (F1 lights) -->
+        <div v-if="state === 'countdown'" class="speed__countdown">
+          <div class="speed__f1-lights">
+            <div v-for="i in 5" :key="i" class="speed__f1-column">
+              <span
+                class="speed__f1-light"
+                :class="{
+                  'speed__f1-light--red': litCount >= i,
+                  'speed__f1-light--out': lightsOut
+                }"
+              ></span>
+              <span
+                class="speed__f1-light"
+                :class="{
+                  'speed__f1-light--red': litCount >= i,
+                  'speed__f1-light--out': lightsOut
+                }"
+              ></span>
+            </div>
+          </div>
+          <p class="speed__countdown-text">{{ countdownMessage }}</p>
+
+          <!-- False start overlay -->
+          <button
+            v-if="!lightsOut"
+            class="speed__tap-zone speed__tap-zone--waiting"
+            @mousedown="falseStart"
+            @touchstart.prevent="falseStart"
+          >
+            <span class="speed__tap-label">WAIT...</span>
+          </button>
+
+          <!-- GO! tap zone -->
+          <button
+            v-if="lightsOut"
+            class="speed__tap-zone speed__tap-zone--go"
+            :class="{ 'speed__tap-zone--flash': tapFlash }"
+            @mousedown="react"
+            @touchstart.prevent="react"
+          >
+            <span class="speed__tap-label speed__tap-label--go">GO!</span>
+          </button>
+        </div>
+
+        <!-- RESULT state -->
+        <div v-if="state === 'result'" class="speed__result">
+          <!-- Particle celebration -->
+          <div class="speed__particles" ref="particlesEl">
+            <span v-for="i in 20" :key="i" class="speed__particle" :style="particleStyle(i)"></span>
+          </div>
+
+          <!-- Car launch animation -->
+          <div class="speed__launch-scene">
+            <div class="speed__track-lines">
+              <span v-for="i in 6" :key="i" class="speed__track-line" :style="{ animationDelay: `${i * 0.08}s` }"></span>
+            </div>
+            <svg class="speed__car-launch" viewBox="0 0 200 60" fill="none" :class="{ 'speed__car-launch--go': carLaunched }">
               <path d="M30 45 L45 25 L70 18 L130 18 L155 25 L170 45" stroke="currentColor" stroke-width="1.5" fill="none"/>
               <path d="M25 45 H175" stroke="currentColor" stroke-width="1.5"/>
               <circle cx="55" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
               <circle cx="145" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
               <circle cx="55" cy="48" r="4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
               <circle cx="145" cy="48" r="4" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
-              <path d="M75 18 L80 30 H120 L125 18" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
-            </svg>
-          </div>
-          <p class="speed__instructions">
-            Tap as fast as you can to accelerate from 0 to 100 km/h.
-            <br />Your time is your score. Top 3 this week win a mystery gift.
-          </p>
-          <MagneticButton class="speed__start-btn" @click="startGame">
-            Start Challenge
-          </MagneticButton>
-        </div>
-
-        <!-- PLAYING state -->
-        <div v-if="state === 'playing'" class="speed__playing">
-          <div class="speed__dashboard">
-            <!-- Main speedometer -->
-            <div class="speed__speedo">
-              <svg class="speed__speedo-svg" viewBox="0 0 260 160">
-                <!-- Outer decorative ring -->
-                <path d="M 30 140 A 100 100 0 0 1 230 140" stroke="rgba(200,169,110,0.06)" stroke-width="1" fill="none"/>
-
-                <!-- Tick marks and numbers -->
-                <g v-for="t in 11" :key="t">
-                  <line
-                    :x1="130 + 95 * Math.cos(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    :y1="140 + 95 * Math.sin(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    :x2="130 + (t % 2 === 1 ? 88 : 90) * Math.cos(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    :y2="140 + (t % 2 === 1 ? 88 : 90) * Math.sin(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    stroke="var(--color-accent)"
-                    :stroke-width="t % 2 === 1 ? 1.5 : 0.8"
-                    :opacity="t % 2 === 1 ? 0.5 : 0.25"
-                  />
-                  <text
-                    v-if="t % 2 === 1"
-                    :x="130 + 78 * Math.cos(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    :y="140 + 78 * Math.sin(((t - 1) * 18 - 180) * Math.PI / 180)"
-                    text-anchor="middle"
-                    dominant-baseline="central"
-                    fill="var(--color-muted)"
-                    font-size="9"
-                    font-family="var(--font-display)"
-                  >{{ (t - 1) * 10 }}</text>
-                </g>
-
-                <!-- Track arc -->
-                <path
-                  d="M 40 140 A 90 90 0 0 1 220 140"
-                  stroke="rgba(200,169,110,0.1)"
-                  stroke-width="5"
-                  stroke-linecap="round"
-                  fill="none"
-                />
-                <!-- Progress arc -->
-                <path
-                  d="M 40 140 A 90 90 0 0 1 220 140"
-                  stroke="var(--color-accent)"
-                  stroke-width="5"
-                  stroke-linecap="round"
-                  fill="none"
-                  :stroke-dasharray="arcLength"
-                  :stroke-dashoffset="arcLength - (arcLength * currentSpeed) / 100"
-                  class="speed__arc-progress"
-                />
-
-                <!-- Needle -->
-                <g :style="{ transform: `rotate(${needleAngle}deg)`, transformOrigin: '130px 140px' }" class="speed__needle-group">
-                  <line x1="130" y1="140" x2="130" y2="55" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round"/>
-                  <circle cx="130" cy="140" r="6" fill="var(--color-surface)" stroke="var(--color-accent)" stroke-width="1.5"/>
-                  <circle cx="130" cy="140" r="2" fill="var(--color-accent)"/>
-                </g>
-              </svg>
-              <div class="speed__speed-display">
-                <span class="speed__speed-num">{{ Math.floor(currentSpeed) }}</span>
-                <span class="speed__speed-unit">km/h</span>
-              </div>
-            </div>
-
-            <!-- Timer display -->
-            <div class="speed__timer">
-              <span class="speed__timer-label">TIME</span>
-              <span class="speed__timer-value">{{ displayTime }}</span>
-            </div>
-          </div>
-
-          <!-- Speed lines -->
-          <div class="speed__lines" :style="{ opacity: currentSpeed / 80 }">
-            <span v-for="i in 8" :key="i" class="speed__line" :style="lineStyle(i)"></span>
-          </div>
-
-          <!-- Car silhouette accelerating -->
-          <div class="speed__car-wrap" :style="{ transform: `translateX(${carOffset}px)` }">
-            <svg class="speed__car-moving" viewBox="0 0 200 60" fill="none" :style="{ filter: `blur(${currentSpeed / 60}px)` }">
-              <path d="M30 45 L45 25 L70 18 L130 18 L155 25 L170 45" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <path d="M25 45 H175" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="55" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <circle cx="145" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-            </svg>
-          </div>
-
-          <!-- Tap zone -->
-          <button
-            class="speed__tap-zone"
-            @mousedown="tap"
-            @touchstart.prevent="tap"
-            :class="{ 'speed__tap-zone--flash': tapFlash }"
-          >
-            <span class="speed__tap-ripple" v-for="r in ripples" :key="r.id" :style="{ left: r.x + 'px', top: r.y + 'px' }"></span>
-            <span class="speed__tap-label">TAP!</span>
-          </button>
-        </div>
-
-        <!-- RESULT state -->
-        <div v-if="state === 'result'" class="speed__result">
-          <div class="speed__result-celebration">
-            <span v-for="i in 12" :key="i" class="speed__confetti" :style="confettiStyle(i)"></span>
-          </div>
-
-          <!-- Car celebration -->
-          <div class="speed__result-car">
-            <svg class="speed__car-celebrate" viewBox="0 0 200 60" fill="none">
-              <path d="M30 45 L45 25 L70 18 L130 18 L155 25 L170 45" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <path d="M25 45 H175" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="55" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
-              <circle cx="145" cy="48" r="10" stroke="currentColor" stroke-width="1.5" fill="none"/>
             </svg>
           </div>
 
           <div class="speed__result-time">
-            <span class="speed__result-num">{{ finalTime }}</span>
-            <span class="speed__result-unit">seconds</span>
+            <span class="speed__result-num" :class="resultTier">{{ reactionTime }}</span>
+            <span class="speed__result-unit">ms</span>
           </div>
+          <div class="speed__result-badge" :class="resultTier">{{ resultLabel }}</div>
           <p class="speed__result-msg">{{ resultMessage }}</p>
+
+          <!-- Mystery Box Teaser -->
+          <div class="speed__mystery-box" v-if="isTopScore">
+            <div class="speed__box-icon">
+              <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2">
+                <rect x="4" y="16" width="32" height="20" rx="2"/>
+                <path d="M4 16 L20 4 L36 16"/>
+                <path d="M20 4 V36"/>
+                <circle cx="14" cy="26" r="3" opacity="0.5"/>
+                <circle cx="26" cy="26" r="3" opacity="0.5"/>
+              </svg>
+            </div>
+            <span class="speed__box-text">You could win the Mystery Box!</span>
+          </div>
 
           <!-- Score submission form -->
           <form v-if="!scoreSubmitted" class="speed__submit-form" @submit.prevent="submitScore">
@@ -184,9 +157,28 @@
           </MagneticButton>
         </div>
 
+        <!-- FALSE START state -->
+        <div v-if="state === 'false-start'" class="speed__false-start">
+          <div class="speed__false-icon">&#10005;</div>
+          <h3 class="speed__false-title">False Start!</h3>
+          <p class="speed__false-text">You tapped before the lights went out. Stay patient!</p>
+          <MagneticButton class="speed__retry-btn" @click="resetGame">
+            Try Again
+          </MagneticButton>
+        </div>
+
         <!-- Leaderboard -->
-        <div class="speed__leaderboard" v-if="state !== 'playing'">
-          <h3 class="speed__lb-title">This Week's Fastest</h3>
+        <div class="speed__leaderboard" v-if="state === 'idle' || state === 'result' || state === 'false-start'">
+          <h3 class="speed__lb-title">
+            <svg class="speed__lb-trophy-icon" viewBox="0 0 20 20" fill="none">
+              <path d="M6 3H14V8C14 11 12 13 10 13C8 13 6 11 6 8V3Z" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M6 5H3C3 8 5 9 6 9" stroke="currentColor" stroke-width="1"/>
+              <path d="M14 5H17C17 8 15 9 14 9" stroke="currentColor" stroke-width="1"/>
+              <path d="M8 13V15H12V13" stroke="currentColor" stroke-width="1"/>
+              <path d="M7 15H13" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            This Week's Fastest
+          </h3>
           <div class="speed__lb-list">
             <div
               v-for="(entry, i) in leaderboard"
@@ -199,7 +191,6 @@
               }"
             >
               <span class="speed__lb-rank">
-                <!-- Trophy SVGs for top 3 -->
                 <svg v-if="i < 3" class="speed__trophy" viewBox="0 0 20 20" fill="none">
                   <path d="M6 3H14V8C14 11 12 13 10 13C8 13 6 11 6 8V3Z" stroke="currentColor" stroke-width="1.2"/>
                   <path d="M6 5H3C3 8 5 9 6 9" stroke="currentColor" stroke-width="1"/>
@@ -210,10 +201,10 @@
                 <span v-else>{{ i + 1 }}</span>
               </span>
               <span class="speed__lb-name">{{ entry.name }}</span>
-              <span class="speed__lb-score">{{ entry.score }}s</span>
+              <span class="speed__lb-score">{{ entry.score }}ms</span>
             </div>
             <p v-if="leaderboard.length === 0" class="speed__lb-empty">
-              No scores yet — be the first!
+              No scores yet â€” be the first!
             </p>
           </div>
         </div>
@@ -229,112 +220,133 @@ import SectionHeading from './SectionHeading.vue'
 import MagneticButton from './MagneticButton.vue'
 
 const state = ref('idle')
-const currentSpeed = ref(0)
-const startTime = ref(0)
-const elapsed = ref(0)
-const finalTime = ref('0.00')
+const litCount = ref(0)
+const lightsOut = ref(false)
+const lightsOutTime = ref(0)
+const reactionTime = ref(0)
 const tapFlash = ref(false)
-const shaking = ref(false)
+const carLaunched = ref(false)
 const playerName = ref('')
 const playerEmail = ref('')
 const scoreSubmitted = ref(false)
 const leaderboard = ref([])
-const ripples = ref([])
-let rippleId = 0
+const particlesEl = ref(null)
 
-let gameTimer = null
+let lightTimers = []
+let goTimeout = null
 
-const arcLength = 283 // approximate arc path length
-
-const needleAngle = computed(() => {
-  // -90 at 0, +90 at 100
-  return -90 + (currentSpeed.value / 100) * 180
+const countdownMessage = computed(() => {
+  if (lightsOut.value) return ''
+  if (litCount.value === 0) return 'Get ready...'
+  return ''
 })
 
-const carOffset = computed(() => {
-  return (currentSpeed.value / 100) * 60
-})
-
-const displayTime = computed(() => {
-  return (elapsed.value / 1000).toFixed(2) + 's'
+const resultLabel = computed(() => {
+  const ms = reactionTime.value
+  if (ms < 200) return 'Superhuman'
+  if (ms < 250) return 'Lightning'
+  if (ms < 300) return 'Excellent'
+  if (ms < 400) return 'Good'
+  return 'Keep Practicing'
 })
 
 const resultMessage = computed(() => {
-  const t = parseFloat(finalTime.value)
-  if (t < 4) return 'Unbelievable! You have lightning reflexes!'
-  if (t < 6) return 'Impressive speed! A true racer.'
-  if (t < 8) return 'Solid performance. Try again to beat it!'
-  return 'Keep tapping — you can do better!'
+  const ms = reactionTime.value
+  if (ms < 200) return 'Incredible! F1 driver-level reflexes!'
+  if (ms < 250) return 'Blazing fast â€” you\'re a natural!'
+  if (ms < 300) return 'Excellent reaction. Try again to break 250ms!'
+  if (ms < 400) return 'Solid start! Most people are in this range.'
+  return 'Don\'t worry â€” reaction time improves with practice!'
 })
 
-function lineStyle(i) {
-  return {
-    top: `${10 + (i * 10)}%`,
-    animationDelay: `${i * 0.05}s`,
-    width: `${20 + Math.random() * 40}px`,
-  }
-}
+const resultTier = computed(() => {
+  const ms = reactionTime.value
+  if (ms < 200) return 'tier-legendary'
+  if (ms < 250) return 'tier-gold'
+  if (ms < 300) return 'tier-silver'
+  if (ms < 400) return 'tier-bronze'
+  return 'tier-normal'
+})
+
+const isTopScore = computed(() => {
+  if (leaderboard.value.length < 3) return true
+  return reactionTime.value < parseFloat(leaderboard.value[2]?.score || 999)
+})
 
 function startGame() {
-  state.value = 'playing'
-  currentSpeed.value = 0
-  elapsed.value = 0
-  startTime.value = Date.now()
+  state.value = 'countdown'
+  litCount.value = 0
+  lightsOut.value = false
+  carLaunched.value = false
   scoreSubmitted.value = false
-  ripples.value = []
 
-  gameTimer = setInterval(() => {
-    elapsed.value = Date.now() - startTime.value
-  }, 16)
+  for (let i = 1; i <= 5; i++) {
+    const t = setTimeout(() => {
+      litCount.value = i
+    }, i * 1000)
+    lightTimers.push(t)
+  }
+
+  const randomDelay = 6000 + Math.random() * 2000
+  goTimeout = setTimeout(() => {
+    lightsOut.value = true
+    lightsOutTime.value = performance.now()
+  }, randomDelay)
 }
 
-function tap(e) {
-  if (state.value !== 'playing') return
+function react() {
+  if (!lightsOut.value || state.value !== 'countdown') return
 
-  const increment = 2 + Math.random()
-  currentSpeed.value = Math.min(100, currentSpeed.value + increment)
-
-  // Visual flash
+  const ms = Math.round(performance.now() - lightsOutTime.value)
+  reactionTime.value = ms
   tapFlash.value = true
-  setTimeout(() => { tapFlash.value = false }, 80)
+  setTimeout(() => { tapFlash.value = false }, 150)
 
-  // Screen shake
-  shaking.value = true
-  setTimeout(() => { shaking.value = false }, 100)
+  setTimeout(() => {
+    carLaunched.value = true
+  }, 100)
 
-  // Ripple effect
-  const btn = e.currentTarget
-  if (btn) {
-    const rect = btn.getBoundingClientRect()
-    const x = (e.clientX || e.touches?.[0]?.clientX || rect.width / 2) - rect.left
-    const y = (e.clientY || e.touches?.[0]?.clientY || rect.height / 2) - rect.top
-    const id = ++rippleId
-    ripples.value.push({ id, x, y })
-    setTimeout(() => {
-      ripples.value = ripples.value.filter(r => r.id !== id)
-    }, 600)
-  }
-
-  if (currentSpeed.value >= 100) {
-    finishGame()
-  }
-}
-
-function finishGame() {
-  clearInterval(gameTimer)
-  elapsed.value = Date.now() - startTime.value
-  finalTime.value = (elapsed.value / 1000).toFixed(2)
   state.value = 'result'
 }
 
+function falseStart() {
+  clearAllTimers()
+  state.value = 'false-start'
+}
+
 function resetGame() {
+  clearAllTimers()
   state.value = 'idle'
-  currentSpeed.value = 0
-  elapsed.value = 0
+  litCount.value = 0
+  lightsOut.value = false
+  reactionTime.value = 0
   playerName.value = ''
   playerEmail.value = ''
   scoreSubmitted.value = false
-  ripples.value = []
+  carLaunched.value = false
+}
+
+function clearAllTimers() {
+  lightTimers.forEach(t => clearTimeout(t))
+  lightTimers = []
+  if (goTimeout) clearTimeout(goTimeout)
+  goTimeout = null
+}
+
+function particleStyle(i) {
+  const angle = (i / 20) * 360
+  const distance = 60 + Math.random() * 100
+  const px = Math.cos(angle * Math.PI / 180) * distance
+  const py = Math.sin(angle * Math.PI / 180) * distance
+  return {
+    '--px': px + 'px',
+    '--py': py + 'px',
+    animationDelay: (i * 0.05) + 's',
+    background: i % 3 === 0 ? 'var(--color-accent)' : i % 3 === 1 ? 'var(--color-accent-hover)' : 'var(--color-text)',
+    width: `${3 + Math.random() * 4}px`,
+    height: `${3 + Math.random() * 4}px`,
+    borderRadius: i % 2 === 0 ? '50%' : '1px',
+  }
 }
 
 async function submitScore() {
@@ -348,13 +360,13 @@ async function submitScore() {
           type: 'score',
           name: playerName.value,
           email: playerEmail.value,
-          score: finalTime.value,
+          score: reactionTime.value,
           timestamp: new Date().toISOString(),
         }),
       })
     }
     scoreSubmitted.value = true
-    leaderboard.value.push({ name: playerName.value, score: finalTime.value })
+    leaderboard.value.push({ name: playerName.value, score: String(reactionTime.value) })
     leaderboard.value.sort((a, b) => parseFloat(a.score) - parseFloat(b.score))
     leaderboard.value = leaderboard.value.slice(0, 10)
   } catch {
@@ -365,11 +377,11 @@ async function submitScore() {
 async function fetchLeaderboard() {
   if (!API.sheetsEndpoint) {
     leaderboard.value = [
-      { name: 'Ahmad K.', score: '3.82' },
-      { name: 'Sara M.', score: '4.15' },
-      { name: 'Khaled R.', score: '4.67' },
-      { name: 'Fatima A.', score: '5.01' },
-      { name: 'Omar T.', score: '5.34' },
+      { name: 'Ahmad K.', score: '187' },
+      { name: 'Sara M.', score: '215' },
+      { name: 'Khaled R.', score: '238' },
+      { name: 'Fatima A.', score: '267' },
+      { name: 'Omar T.', score: '312' },
     ]
     return
   }
@@ -382,23 +394,12 @@ async function fetchLeaderboard() {
   } catch { /* empty */ }
 }
 
-function confettiStyle(i) {
-  return {
-    left: `${5 + Math.random() * 90}%`,
-    animationDelay: `${i * 0.1}s`,
-    background: i % 3 === 0 ? 'var(--color-accent)' : i % 3 === 1 ? 'var(--color-accent-hover)' : 'var(--color-text)',
-    width: `${4 + Math.random() * 4}px`,
-    height: `${4 + Math.random() * 4}px`,
-    borderRadius: i % 2 === 0 ? '50%' : '1px',
-  }
-}
-
 onMounted(() => {
   fetchLeaderboard()
 })
 
 onUnmounted(() => {
-  clearInterval(gameTimer)
+  clearAllTimers()
 })
 </script>
 
@@ -407,6 +408,57 @@ onUnmounted(() => {
   background-color: var(--color-bg);
 }
 
+/* â”€â”€ Prize Banner â”€â”€ */
+.speed__prize-banner {
+  max-width: 650px;
+  margin: 0 auto var(--gap-md);
+}
+
+.speed__prize-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 28px;
+  background: rgba(200, 169, 110, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: var(--glass-radius);
+  box-shadow: 0 0 30px rgba(200, 169, 110, 0.08);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.speed__prize-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.speed__prize-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.speed__prize-label {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+
+.speed__prize-sub {
+  font-size: var(--text-small);
+  color: var(--color-muted);
+  letter-spacing: 0.05em;
+}
+
+/* â”€â”€ Arena â”€â”€ */
 .speed__arena {
   max-width: 650px;
   margin: 0 auto;
@@ -415,50 +467,25 @@ onUnmounted(() => {
   align-items: center;
   gap: var(--gap-lg);
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--glass-radius);
   overflow: hidden;
   padding: 40px 24px;
-  background: var(--color-surface);
-  border: 1px solid rgba(200, 169, 110, 0.08);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-.speed__arena--shake {
-  animation: dashShake 0.1s ease;
-}
-
-@keyframes dashShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-2px) translateY(1px); }
-  75% { transform: translateX(2px) translateY(-1px); }
-}
-
-/* Edge glow */
-.speed__edge-glow {
+.speed__arena-shine {
   position: absolute;
   inset: 0;
+  background: var(--glass-shine);
   pointer-events: none;
   z-index: 0;
-  box-shadow: inset 0 0 80px rgba(200, 169, 110, 0.15);
-  border-radius: 12px;
-  transition: opacity 0.2s ease;
 }
 
-/* Carbon fiber texture */
-.speed__carbon-bg {
-  position: absolute;
-  inset: 0;
-  opacity: 0.03;
-  pointer-events: none;
-  background-image:
-    linear-gradient(45deg, #222 25%, transparent 25%),
-    linear-gradient(-45deg, #222 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #222 75%),
-    linear-gradient(-45deg, transparent 75%, #222 75%);
-  background-size: 4px 4px;
-  background-position: 0 0, 0 2px, 2px -2px, -2px 0;
-}
-
-/* ── Idle ── */
+/* â”€â”€ Idle â”€â”€ */
 .speed__idle {
   text-align: center;
   display: flex;
@@ -469,15 +496,27 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-.speed__idle-visual {
-  width: 200px;
+.speed__idle-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--color-text);
+}
+
+.speed__lights-preview {
+  display: flex;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
-.speed__car-icon {
-  width: 100%;
-  color: var(--color-accent);
-  opacity: 0.3;
+.speed__light-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .speed__instructions {
@@ -487,179 +526,125 @@ onUnmounted(() => {
   max-width: 440px;
 }
 
-/* ── Playing ── */
-.speed__playing {
+/* â”€â”€ F1 Lights â”€â”€ */
+.speed__countdown {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 32px;
   width: 100%;
   position: relative;
   z-index: 1;
+  min-height: 300px;
 }
 
-.speed__dashboard {
+.speed__f1-lights {
+  display: flex;
+  gap: clamp(12px, 3vw, 24px);
+  padding: 24px 32px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.speed__f1-column {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
 }
 
-.speed__speedo {
-  position: relative;
-  width: clamp(240px, 50vw, 300px);
+.speed__f1-light {
+  width: clamp(28px, 6vw, 44px);
+  height: clamp(28px, 6vw, 44px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
 }
 
-.speed__speedo-svg {
-  width: 100%;
+.speed__f1-light--red {
+  background: #e63946;
+  border-color: #ff1a2d;
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(230, 57, 70, 0.6),
+    0 0 40px rgba(230, 57, 70, 0.3);
 }
 
-.speed__arc-progress {
-  transition: stroke-dashoffset 0.15s ease;
-  filter: drop-shadow(0 0 6px rgba(200, 169, 110, 0.4));
+.speed__f1-light--out {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: all 0.05s ease;
 }
 
-.speed__needle-group {
-  transition: transform 0.15s ease-out;
-  filter: drop-shadow(0 0 4px rgba(200, 169, 110, 0.3));
-}
-
-.speed__speed-display {
-  position: absolute;
-  bottom: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.speed__speed-num {
+.speed__countdown-text {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1;
-}
-
-.speed__speed-unit {
-  display: block;
-  font-size: var(--text-small);
-  letter-spacing: 0.1em;
+  font-size: var(--text-body);
+  letter-spacing: 0.15em;
   color: var(--color-muted);
   text-transform: uppercase;
+  min-height: 24px;
 }
 
-.speed__timer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.speed__timer-label {
-  font-size: var(--text-small);
-  letter-spacing: 0.2em;
-  color: var(--color-muted);
-  text-transform: uppercase;
-}
-
-.speed__timer-value {
-  font-family: var(--font-display);
-  font-size: var(--text-h3);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--color-accent);
-}
-
-/* Speed lines */
-.speed__lines {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 60px;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.speed__line {
-  position: absolute;
-  left: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-accent), transparent);
-  opacity: 0.4;
-  animation: lineSlide 0.3s linear infinite;
-}
-
-@keyframes lineSlide {
-  0% { transform: translateX(0); opacity: 0.4; }
-  100% { transform: translateX(-30px); opacity: 0; }
-}
-
-/* Car silhouette */
-.speed__car-wrap {
-  width: 160px;
-  transition: transform 0.2s ease;
-  margin-top: -8px;
-}
-
-.speed__car-moving {
-  width: 100%;
-  color: var(--color-accent);
-  opacity: 0.25;
-}
-
-/* Tap zone */
+/* â”€â”€ Tap Zone â”€â”€ */
 .speed__tap-zone {
   width: 100%;
   max-width: 400px;
-  padding: 50px 40px;
-  background: rgba(200, 169, 110, 0.04);
-  border: 2px solid rgba(200, 169, 110, 0.15);
-  border-radius: 12px;
+  padding: 60px 40px;
+  border-radius: var(--glass-radius);
   cursor: pointer;
-  transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease;
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   position: relative;
   overflow: hidden;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
 }
 
-.speed__tap-zone:active,
+.speed__tap-zone--waiting {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+}
+
+.speed__tap-zone--go {
+  background: rgba(200, 169, 110, 0.08);
+  border: 2px solid rgba(200, 169, 110, 0.4);
+  animation: goPulse 0.5s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(200, 169, 110, 0.2);
+}
+
 .speed__tap-zone--flash {
-  background: rgba(200, 169, 110, 0.1);
-  border-color: var(--color-accent);
+  background: rgba(200, 169, 110, 0.2);
+}
+
+@keyframes goPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(200, 169, 110, 0.15); }
+  50% { box-shadow: 0 0 50px rgba(200, 169, 110, 0.35); }
 }
 
 .speed__tap-label {
   font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.speed__tap-label--go {
   font-size: var(--text-h2);
   font-weight: 700;
-  letter-spacing: 0.2em;
   color: var(--color-accent);
-  pointer-events: none;
-  position: relative;
-  z-index: 1;
+  text-shadow: 0 0 20px rgba(200, 169, 110, 0.5);
 }
 
-/* Tap ripple */
-.speed__tap-ripple {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(200, 169, 110, 0.15);
-  transform: translate(-50%, -50%) scale(0);
-  animation: tapRipple 0.6s ease-out forwards;
-  pointer-events: none;
-}
-
-@keyframes tapRipple {
-  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
-}
-
-/* ── Result ── */
+/* â”€â”€ Result â”€â”€ */
 .speed__result {
   text-align: center;
   display: flex;
@@ -670,62 +655,139 @@ onUnmounted(() => {
   z-index: 1;
 }
 
-.speed__result-celebration {
+/* Particles */
+.speed__particles {
   position: absolute;
-  inset: -60px;
+  top: 50%;
+  left: 50%;
   pointer-events: none;
-  overflow: hidden;
 }
 
-.speed__confetti {
+.speed__particle {
   position: absolute;
   top: 0;
-  animation: confettiFall 2.5s ease-out forwards;
+  left: 0;
+  transform: translate(-50%, -50%);
+  animation: particleBurst 1.2s ease-out forwards;
 }
 
-@keyframes confettiFall {
-  0% { transform: translateY(-30px) rotate(0deg) scale(0); opacity: 1; }
-  20% { transform: translateY(20px) rotate(90deg) scale(1); opacity: 1; }
-  100% { transform: translateY(250px) rotate(360deg) scale(0.5); opacity: 0; }
-}
-
-.speed__result-car {
-  width: 180px;
-  color: var(--color-accent);
-  opacity: 0.2;
-  animation: carBounce 1s ease-out;
-}
-
-@keyframes carBounce {
-  0% { transform: translateX(-50px); opacity: 0; }
-  60% { transform: translateX(10px); opacity: 0.3; }
-  100% { transform: translateX(0); opacity: 0.2; }
-}
-
-.speed__car-celebrate {
+/* Car launch */
+.speed__launch-scene {
+  position: relative;
   width: 100%;
+  max-width: 350px;
+  height: 80px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.speed__track-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.speed__track-line {
+  position: absolute;
+  right: 0;
+  height: 1px;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, var(--color-accent));
+  opacity: 0;
+  animation: trackLineSlide 0.8s ease-out forwards;
+}
+
+.speed__track-line:nth-child(1) { top: 15%; }
+.speed__track-line:nth-child(2) { top: 30%; }
+.speed__track-line:nth-child(3) { top: 45%; }
+.speed__track-line:nth-child(4) { top: 60%; }
+.speed__track-line:nth-child(5) { top: 75%; }
+.speed__track-line:nth-child(6) { top: 90%; }
+
+@keyframes trackLineSlide {
+  0% { opacity: 0; width: 0; }
+  30% { opacity: 0.5; width: 60px; }
+  100% { opacity: 0; width: 120px; transform: translateX(-80px); }
+}
+
+.speed__car-launch {
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 120px;
+  color: var(--color-accent);
+  opacity: 0.4;
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.speed__car-launch--go {
+  left: 80%;
+  opacity: 0;
+  filter: blur(3px);
 }
 
 .speed__result-time {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: baseline;
+  gap: 4px;
 }
 
 .speed__result-num {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-size: clamp(3rem, 10vw, 5rem);
   font-weight: 700;
-  color: var(--color-accent);
   line-height: 1;
 }
 
+.speed__result-num.tier-legendary { color: #ff6b6b; text-shadow: 0 0 30px rgba(255, 107, 107, 0.5); }
+.speed__result-num.tier-gold { color: var(--color-accent); text-shadow: 0 0 20px rgba(200, 169, 110, 0.4); }
+.speed__result-num.tier-silver { color: #c0c0c0; }
+.speed__result-num.tier-bronze { color: #cd7f32; }
+.speed__result-num.tier-normal { color: var(--color-text); }
+
 .speed__result-unit {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.speed__result-badge {
+  display: inline-flex;
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-family: var(--font-display);
   font-size: var(--text-caption);
+  font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
+}
+
+.speed__result-badge.tier-legendary {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+}
+.speed__result-badge.tier-gold {
+  background: rgba(200, 169, 110, 0.1);
+  border: 1px solid rgba(200, 169, 110, 0.3);
+  color: var(--color-accent);
+}
+.speed__result-badge.tier-silver {
+  background: rgba(192, 192, 192, 0.08);
+  border: 1px solid rgba(192, 192, 192, 0.2);
+  color: #c0c0c0;
+}
+.speed__result-badge.tier-bronze {
+  background: rgba(205, 127, 50, 0.08);
+  border: 1px solid rgba(205, 127, 50, 0.2);
+  color: #cd7f32;
+}
+.speed__result-badge.tier-normal {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--color-muted);
-  margin-top: 4px;
 }
 
 .speed__result-msg {
@@ -734,7 +796,77 @@ onUnmounted(() => {
   max-width: 350px;
 }
 
-/* Submit form */
+/* Mystery Box */
+.speed__mystery-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(200, 169, 110, 0.06);
+  border: 1px solid rgba(200, 169, 110, 0.2);
+  border-radius: var(--glass-radius);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.speed__box-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-accent);
+}
+
+.speed__box-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.speed__box-text {
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+}
+
+/* False Start */
+.speed__false-start {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+  padding: 40px;
+}
+
+.speed__false-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(230, 57, 70, 0.15);
+  border: 1px solid rgba(230, 57, 70, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #e63946;
+}
+
+.speed__false-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #e63946;
+}
+
+.speed__false-text {
+  font-size: var(--text-body);
+  color: var(--color-muted);
+  max-width: 350px;
+}
+
+/* â”€â”€ Submit Form â”€â”€ */
 .speed__submit-form {
   display: flex;
   flex-direction: column;
@@ -750,9 +882,11 @@ onUnmounted(() => {
   font-family: var(--font-body);
   font-size: var(--text-body);
   color: var(--color-text);
-  background: var(--color-bg);
-  border: 1px solid rgba(200, 169, 110, 0.12);
-  border-radius: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
   outline: none;
   transition: border-color var(--duration-fast) ease;
 }
@@ -778,7 +912,7 @@ onUnmounted(() => {
   color: var(--color-text);
 }
 
-/* ── Leaderboard ── */
+/* â”€â”€ Leaderboard â”€â”€ */
 .speed__leaderboard {
   width: 100%;
   max-width: 400px;
@@ -794,6 +928,16 @@ onUnmounted(() => {
   text-align: center;
   margin-bottom: 16px;
   color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.speed__lb-trophy-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
 }
 
 .speed__lb-list {
@@ -807,27 +951,25 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: var(--color-bg);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 4px;
-  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+  border-radius: 10px;
+  transition: all var(--duration-fast) ease;
 }
 
 .speed__lb-entry:hover {
   border-color: rgba(200, 169, 110, 0.12);
+  background: var(--glass-bg-hover);
 }
 
 .speed__lb-entry--gold {
   border-color: rgba(255, 215, 0, 0.15);
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.05);
 }
-.speed__lb-entry--silver {
-  border-color: rgba(192, 192, 192, 0.1);
-}
-.speed__lb-entry--bronze {
-  border-color: rgba(205, 127, 50, 0.1);
-}
-
+.speed__lb-entry--silver { border-color: rgba(192, 192, 192, 0.1); }
+.speed__lb-entry--bronze { border-color: rgba(205, 127, 50, 0.1); }
 .speed__lb-entry--gold .speed__trophy { color: #ffd700; }
 .speed__lb-entry--silver .speed__trophy { color: #c0c0c0; }
 .speed__lb-entry--bronze .speed__trophy { color: #cd7f32; }
@@ -839,10 +981,7 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-.speed__trophy {
-  width: 18px;
-  height: 18px;
-}
+.speed__trophy { width: 18px; height: 18px; }
 
 .speed__lb-rank span {
   font-family: var(--font-display);

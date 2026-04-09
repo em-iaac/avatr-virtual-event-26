@@ -1,7 +1,7 @@
 [
   {
     "id": "avatr-11",
-    "name": "AVATR 11",
+    "name": "AVATR 011",
     "type": "Luxury SUV",
     "tagline": "Where Intelligence Meets Elegance",
     "image": "avatr-011.png",
@@ -19,7 +19,7 @@
   },
   {
     "id": "avatr-12",
-    "name": "AVATR 12",
+    "name": "AVATR 012",
     "type": "Executive Sedan",
     "tagline": "Redefining the Art of Motion",
     "image": "avatr-012.png",
@@ -36,8 +36,8 @@
     ]
   },
   {
-    "id": "avatr-07",
-    "name": "AVATR 07",
+    "id": "avatr-06",
+    "name": "AVATR 06",
     "type": "Compact SUV",
     "tagline": "Born for the Urban Frontier",
     "image": "avatr-06.png",

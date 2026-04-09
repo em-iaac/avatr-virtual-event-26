@@ -72,17 +72,33 @@ function onLeave() {
   font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: var(--color-bg);
-  background-color: var(--color-accent);
-  border: none;
+  color: var(--color-text);
+  background: rgba(200, 169, 110, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(200, 169, 110, 0.3);
+  border-radius: 60px;
   cursor: pointer;
   overflow: hidden;
   will-change: transform;
-  transition: background-color var(--duration-fast) ease;
+  transition: all var(--duration-fast) ease;
+  box-shadow: 0 4px 20px rgba(200, 169, 110, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.magnetic-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .magnetic-btn:hover {
-  background-color: var(--color-accent-hover);
+  background: rgba(200, 169, 110, 0.2);
+  border-color: rgba(200, 169, 110, 0.5);
+  box-shadow: 0 6px 30px rgba(200, 169, 110, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--color-text);
 }
 
 .magnetic-btn__inner {

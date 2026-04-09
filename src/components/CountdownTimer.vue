@@ -91,12 +91,14 @@ onUnmounted(() => {
 .countdown__digit {
   width: clamp(32px, 5.5vw, 52px);
   height: clamp(48px, 8vw, 76px);
-  background: var(--color-surface);
-  border: 1px solid rgba(200, 169, 110, 0.15);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--glass-shadow);
 }
 
 .countdown__digit-inner {

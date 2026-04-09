@@ -309,8 +309,14 @@ onMounted(() => {
 
 .hero__scroll-line {
   width: 1px;
-  height: 32px;
+  height: 40px;
   background: linear-gradient(to bottom, var(--color-accent), transparent);
   opacity: 0.4;
+  animation: scrollLinePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes scrollLinePulse {
+  0%, 100% { height: 32px; opacity: 0.3; }
+  50% { height: 48px; opacity: 0.6; }
 }
 </style>

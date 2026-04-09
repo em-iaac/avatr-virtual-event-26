@@ -70,6 +70,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 12px 8px;
+  box-shadow: var(--glass-shadow);
 }
 
 .nav-dots__dot {

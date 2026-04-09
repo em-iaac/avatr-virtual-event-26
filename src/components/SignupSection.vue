@@ -182,11 +182,14 @@ async function handleSubmit() {
   font-family: var(--font-body);
   font-size: var(--text-body);
   color: var(--color-text);
-  background: var(--color-surface);
-  border: 1px solid rgba(200, 169, 110, 0.12);
-  border-radius: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
   outline: none;
-  transition: border-color var(--duration-fast) ease;
+  transition: all var(--duration-fast) ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .signup__input::placeholder {

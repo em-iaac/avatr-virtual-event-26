@@ -54,15 +54,32 @@ const imageSrc = computed(() => {
 
 <style scoped>
 .vehicle-card {
-  background: var(--color-surface);
-  border: 1px solid rgba(200, 169, 110, 0.08);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
   overflow: hidden;
-  transition: border-color var(--duration-fast) ease;
+  box-shadow: var(--glass-shadow);
+  transition: all var(--duration-fast) ease;
+  position: relative;
+}
+
+.vehicle-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass-shine);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
 }
 
 .vehicle-card:hover {
-  border-color: rgba(200, 169, 110, 0.25);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-hover);
+  background: var(--glass-bg-hover);
+  transform: translateY(-4px);
 }
 
 .vehicle-card__image-wrap {

@@ -69,7 +69,7 @@ const results = quizData.results
 const currentQ = ref(0)
 const selectedOption = ref(null)
 const showResult = ref(false)
-const scores = ref({ 'avatr-11': 0, 'avatr-12': 0, 'avatr-07': 0 })
+const scores = ref({ 'avatr-11': 0, 'avatr-12': 0, 'avatr-06': 0 })
 
 const imageModules = import.meta.glob('../assets/avatr-*.png', { eager: true })
 
@@ -115,7 +115,7 @@ function resetQuiz() {
   currentQ.value = 0
   selectedOption.value = null
   showResult.value = false
-  scores.value = { 'avatr-11': 0, 'avatr-12': 0, 'avatr-07': 0 }
+  scores.value = { 'avatr-11': 0, 'avatr-12': 0, 'avatr-06': 0 }
 }
 </script>
 
@@ -188,22 +188,38 @@ function resetQuiz() {
   gap: 16px;
   width: 100%;
   padding: 20px 24px;
-  background: var(--color-bg);
-  border: 1px solid rgba(200, 169, 110, 0.08);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.quiz__option::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass-shine);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 .quiz__option:hover {
-  border-color: rgba(200, 169, 110, 0.25);
-  background: rgba(200, 169, 110, 0.03);
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .quiz__option--selected {
-  border-color: var(--color-accent);
-  background: rgba(200, 169, 110, 0.08);
+  border-color: rgba(200, 169, 110, 0.5);
+  background: rgba(200, 169, 110, 0.1);
+  box-shadow: 0 0 30px rgba(200, 169, 110, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .quiz__option-indicator {
