@@ -14,6 +14,21 @@
         <div class="host__meta">
           <span class="host__name">Ava</span>
           <span class="host__role">Virtual Guide</span>
+          <button
+            class="host__mute-btn"
+            :title="voiceMuted ? 'Unmute Ava' : 'Mute Ava'"
+            @click.stop="toggleMute"
+          >
+            <svg v-if="!voiceMuted" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" class="host__mute-icon">
+              <path d="M9 4L5 7H2v6h3l4 3V4z"/>
+              <path d="M13 7a4 4 0 010 6"/>
+            </svg>
+            <svg v-else viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" class="host__mute-icon">
+              <path d="M9 4L5 7H2v6h3l4 3V4z"/>
+              <line x1="15" y1="7" x2="11" y2="13"/>
+              <line x1="11" y1="7" x2="15" y2="13"/>
+            </svg>
+          </button>
         </div>
         <p class="host__message">{{ currentText }}</p>
         <div class="host__chips" v-if="expanded && activeMessage?.tips?.length">
@@ -25,51 +40,42 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const expanded = ref(false)
-const activeSection = ref('hero')
+const voiceMuted = ref(false)
+const spokenRooms = new Set()
 
 const messages = {
-  hero: {
-    text: 'Welcome to the pre-event lobby. Start with the invitation, then uncover the car, then enter the play rooms.',
-    tips: ['Reserve your seat', 'Set your YouTube reminder', 'Follow the light'],
+  lobby: {
+    text: 'Welcome to the AVATR experience. Choose a room from the emblem map to begin your journey.',
+    tips: ['Explore each room', 'Complete the quiz to unlock the invitation'],
   },
-  story: {
-    text: 'This room explains why AVATR feels different: design, intelligence, and delight working together.',
-    tips: ['Read the origin', 'Look for the design cues'],
+  'waiting-room': {
+    text: 'This is the waiting room. Explore the brand story, test your reflexes, and discover your AVATR match.',
+    tips: ['Try the speed challenge', 'Complete the quiz to unlock a special room'],
   },
-  reveal: {
-    text: 'This is the reveal chamber. Drag to rotate the model. Move your cursor to sweep light across the bodywork.',
-    tips: ['Drag to rotate', 'Hover to reveal surfaces', 'Scroll to unlock specs'],
+  'reveal-room': {
+    text: 'Welcome to the reveal chamber. Drag to rotate the model. Move your cursor to sweep light across the bodywork. Toggle the lights to see it fully.',
+    tips: ['Drag to rotate', 'Move cursor to reveal surfaces', 'Toggle lights on'],
   },
-  experience: {
-    text: 'You do not need to experience this like a long webpage. Think of it as a set of rooms you can jump between.',
-    tips: ['Enter a room', 'Discover the mystery room'],
+  'watching-room': {
+    text: 'The premiere theater. The show begins on May 1st at 8 PM Kuwait time.',
+    tips: ['Set your YouTube reminder', 'Share the event'],
   },
-  performance: {
-    text: 'Here the product stops being abstract. Numbers start telling the story.',
-    tips: ['Check the performance figures'],
-  },
-  challenge: {
-    text: 'This is the play room. Beat the leaderboard, then share your time.',
-    tips: ['Save your score', 'Share your result'],
-  },
-  quiz: {
-    text: 'This room personalizes the brand. It helps visitors imagine their AVATR match.',
-    tips: ['Find your match'],
-  },
-  mystery: {
-    text: 'Mystery room is a teaser. Keep it strange. Keep it unfinished. It should feel like a second reveal is coming.',
-    tips: ['Locked content', 'Future unlock'],
-  },
-  signup: {
-    text: 'Finish with your seat reservation. This is the conversion moment.',
-    tips: ['Claim your invite card'],
+  invitation: {
+    text: 'Congratulations — you have earned your invitation. Reserve your seat and explore exclusive content.',
+    tips: ['Claim your invite card', 'Discover hidden specs'],
   },
 }
 
-const activeMessage = computed(() => messages[activeSection.value] || messages.hero)
+const activeMessage = computed(() => {
+  const roomName = route?.name || 'lobby'
+  return messages[roomName] || messages.lobby
+})
+
 const currentText = computed(() => activeMessage.value?.text || '')
 
 function toggleExpanded() {
@@ -77,27 +83,56 @@ function toggleExpanded() {
   window.__avatrSound?.playClick()
 }
 
-let observers = []
+function toggleMute() {
+  voiceMuted.value = !voiceMuted.value
+  if (voiceMuted.value) {
+    window.speechSynthesis?.cancel()
+  }
+}
 
-onMounted(() => {
-  const targets = Object.keys(messages)
-    .map((id) => document.getElementById(id))
-    .filter(Boolean)
+function speakMessage(text) {
+  if (voiceMuted.value || !window.speechSynthesis) return
 
-  targets.forEach((el) => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) activeSection.value = entry.target.id
-      },
-      { threshold: 0.45 }
-    )
-    observer.observe(el)
-    observers.push(observer)
-  })
-})
+  window.speechSynthesis.cancel()
+
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.rate = 0.92
+  utterance.pitch = 1.05
+  utterance.volume = 0.7
+
+  // Try to pick a natural female voice
+  const voices = window.speechSynthesis.getVoices()
+  const preferred = voices.find(v =>
+    v.lang.startsWith('en') && v.name.toLowerCase().includes('female')
+  ) || voices.find(v =>
+    v.lang.startsWith('en') && (v.name.includes('Samantha') || v.name.includes('Zira') || v.name.includes('Google'))
+  ) || voices.find(v => v.lang.startsWith('en'))
+
+  if (preferred) utterance.voice = preferred
+
+  window.speechSynthesis.speak(utterance)
+}
+
+// Watch route changes to speak contextually
+watch(() => route?.name, (newRoom) => {
+  if (!newRoom) return
+
+  // Only speak once per room per session
+  const key = `ava-spoke-${newRoom}`
+  if (spokenRooms.has(key) || sessionStorage.getItem(key)) return
+
+  spokenRooms.add(key)
+  sessionStorage.setItem(key, '1')
+
+  const msg = messages[newRoom]
+  if (msg) {
+    // Small delay to let the room transition finish
+    setTimeout(() => speakMessage(msg.text), 800)
+  }
+}, { immediate: true })
 
 onUnmounted(() => {
-  observers.forEach((observer) => observer.disconnect())
+  window.speechSynthesis?.cancel()
 })
 </script>
 
@@ -204,6 +239,25 @@ onUnmounted(() => {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-accent);
+}
+
+.host__mute-btn {
+  margin-left: auto;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-muted);
+  transition: color 0.2s ease;
+}
+
+.host__mute-btn:hover {
+  color: var(--color-accent);
+}
+
+.host__mute-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .host__message {

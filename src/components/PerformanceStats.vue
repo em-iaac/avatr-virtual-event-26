@@ -70,12 +70,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionHeading from './SectionHeading.vue'
 import ScrollReveal from './ScrollReveal.vue'
 import carBg from '../assets/avatr-012.png'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const section = ref(null)
 const counterRefs = ref([])
@@ -102,32 +99,30 @@ onMounted(() => {
       const gaugeEl = gaugeRefs.value[i]
       const fillAmount = stats[i].fill
 
-      ScrollTrigger.create({
-        trigger: el,
-        start: 'top 80%',
-        once: true,
-        onEnter: () => {
-          // Animate number
-          const obj = { val: 0 }
-          gsap.to(obj, {
-            val: target,
-            duration: 2,
-            ease: 'power2.out',
-            onUpdate: () => {
-              el.textContent = isDecimal ? obj.val.toFixed(1) : Math.floor(obj.val)
-            },
-          })
+      // Animate on mount with staggered delay
+      const delay = i * 0.3
 
-          // Animate gauge ring
-          if (gaugeEl) {
-            gsap.to(gaugeEl, {
-              strokeDashoffset: circumference * (1 - fillAmount),
-              duration: 2,
-              ease: 'power2.out',
-            })
-          }
+      // Animate number
+      const obj = { val: 0 }
+      gsap.to(obj, {
+        val: target,
+        duration: 2,
+        delay,
+        ease: 'power2.out',
+        onUpdate: () => {
+          el.textContent = isDecimal ? obj.val.toFixed(1) : Math.floor(obj.val)
         },
       })
+
+      // Animate gauge ring
+      if (gaugeEl) {
+        gsap.to(gaugeEl, {
+          strokeDashoffset: circumference * (1 - fillAmount),
+          duration: 2,
+          delay,
+          ease: 'power2.out',
+        })
+      }
     })
   }, section.value)
 })

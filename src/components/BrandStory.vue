@@ -78,12 +78,9 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import SectionHeading from './SectionHeading.vue'
 import ScrollReveal from './ScrollReveal.vue'
 import emblemWhite from '../assets/avatr-logo-emblem-white.png'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const section = ref(null)
 const line1 = ref(null)
@@ -193,11 +190,7 @@ onMounted(() => {
         duration: 1,
         stagger: 0.3,
         ease: 'power2.inOut',
-        scrollTrigger: {
-          trigger: section.value,
-          start: 'top 60%',
-          once: true,
-        },
+        delay: 0.3,
       })
     }
   }, section.value)

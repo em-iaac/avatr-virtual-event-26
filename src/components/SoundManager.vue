@@ -16,44 +16,62 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const enabled = ref(false)
 let ctx = null
 let masterGain = null
 let ambientNodes = []
+let roomNodes = []
 let isInitialized = false
+let currentRoom = null
 
-// Build the ambient sound engine with Web Audio API
+// ── Room-specific ambient sound profiles ──
+const ROOM_PROFILES = {
+  lobby: { bassHz: 38, bassGain: 0.06, midHz: 82, midGain: 0.04, lfoHz: 0.15, noiseGain: 0.012, bpfHz: 180 },
+  'waiting-room': { bassHz: 50, bassGain: 0.04, midHz: 110, midGain: 0.05, lfoHz: 0.3, noiseGain: 0.02, bpfHz: 300 },
+  'reveal-room': { bassHz: 32, bassGain: 0.08, midHz: 65, midGain: 0.06, lfoHz: 0.08, noiseGain: 0.025, bpfHz: 120 },
+  'watching-room': { bassHz: 42, bassGain: 0.05, midHz: 90, midGain: 0.03, lfoHz: 0.12, noiseGain: 0.008, bpfHz: 150 },
+  invitation: { bassHz: 55, bassGain: 0.03, midHz: 130, midGain: 0.04, lfoHz: 0.5, noiseGain: 0.01, bpfHz: 400 },
+}
+
 function initAudio() {
   if (isInitialized) return
   isInitialized = true
-
   ctx = new (window.AudioContext || window.webkitAudioContext)()
   masterGain = ctx.createGain()
   masterGain.gain.setValueAtTime(0, ctx.currentTime)
   masterGain.connect(ctx.destination)
+}
 
-  // ── Layer 1: Sub-bass hum (felt more than heard — 38 Hz) ──
+// Build room-specific ambient layers
+function buildRoomAmbient(profile) {
+  teardownRoomAmbient()
+  if (!ctx) return
+  currentRoom = profile
+
+  // Layer 1: Sub-bass
   const osc1 = ctx.createOscillator()
   const g1 = ctx.createGain()
   osc1.type = 'sine'
-  osc1.frequency.value = 38
-  g1.gain.value = 0.06
+  osc1.frequency.value = profile.bassHz
+  g1.gain.value = profile.bassGain
   osc1.connect(g1)
   g1.connect(masterGain)
   osc1.start()
-  ambientNodes.push(osc1, g1)
+  roomNodes.push(osc1, g1)
 
-  // ── Layer 2: Mid hum with slow LFO vibrato (82 Hz) ──
+  // Layer 2: Mid hum with LFO
   const osc2 = ctx.createOscillator()
   const g2 = ctx.createGain()
   const lfo = ctx.createOscillator()
   const lfoGain = ctx.createGain()
   osc2.type = 'sine'
-  osc2.frequency.value = 82
-  g2.gain.value = 0.04
-  lfo.frequency.value = 0.2 // very slow vibrato
+  osc2.frequency.value = profile.midHz
+  g2.gain.value = profile.midGain
+  lfo.frequency.value = profile.lfoHz
   lfoGain.gain.value = 1.5
   lfo.connect(lfoGain)
   lfoGain.connect(osc2.frequency)
@@ -61,36 +79,48 @@ function initAudio() {
   g2.connect(masterGain)
   osc2.start()
   lfo.start()
-  ambientNodes.push(osc2, g2, lfo, lfoGain)
+  roomNodes.push(osc2, g2, lfo, lfoGain)
 
-  // ── Layer 3: White-noise atmosphere (electric air texture) ──
-  const bufferSize = ctx.sampleRate * 3 // 3 seconds looped
+  // Layer 3: Shaped noise atmosphere
+  const bufferSize = ctx.sampleRate * 3
   const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
   const data = noiseBuffer.getChannelData(0)
-  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1)
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1
   const noiseSource = ctx.createBufferSource()
   noiseSource.buffer = noiseBuffer
   noiseSource.loop = true
-  // Bandpass filter to shape the noise into a soft hiss
   const bpf = ctx.createBiquadFilter()
   bpf.type = 'bandpass'
-  bpf.frequency.value = 200
+  bpf.frequency.value = profile.bpfHz
   bpf.Q.value = 0.5
   const noiseGain = ctx.createGain()
-  noiseGain.gain.value = 0.015
+  noiseGain.gain.value = profile.noiseGain
   noiseSource.connect(bpf)
   bpf.connect(noiseGain)
   noiseGain.connect(masterGain)
   noiseSource.start()
-  ambientNodes.push(noiseSource, bpf, noiseGain)
+  roomNodes.push(noiseSource, bpf, noiseGain)
+}
+
+function teardownRoomAmbient() {
+  roomNodes.forEach(n => { try { n.stop?.() } catch (_) {} })
+  roomNodes.forEach(n => { try { n.disconnect() } catch (_) {} })
+  roomNodes = []
+  currentRoom = null
+}
+
+function switchRoom(roomName) {
+  const profile = ROOM_PROFILES[roomName] || ROOM_PROFILES.lobby
+  buildRoomAmbient(profile)
 }
 
 function enable() {
   initAudio()
   if (ctx.state === 'suspended') ctx.resume()
+  switchRoom(route.name || 'lobby')
   masterGain.gain.cancelScheduledValues(ctx.currentTime)
   masterGain.gain.setValueAtTime(masterGain.gain.value, ctx.currentTime)
-  masterGain.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2.5) // Slow fade-in
+  masterGain.gain.linearRampToValueAtTime(0.55, ctx.currentTime + 2.5)
 }
 
 function disable() {
@@ -106,7 +136,11 @@ function toggle() {
   else disable()
 }
 
-// Expose for external components to trigger interaction sounds
+// Watch route changes to switch ambient profile
+watch(() => route.name, (roomName) => {
+  if (enabled.value && ctx) switchRoom(roomName)
+})
+
 function playClick() {
   if (!ctx || !enabled.value) return
   const osc = ctx.createOscillator()
@@ -126,7 +160,7 @@ function playWhoosh() {
   const bufLen = Math.floor(ctx.sampleRate * 0.3)
   const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate)
   const d = buf.getChannelData(0)
-  for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1)
+  for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1
   const src = ctx.createBufferSource()
   src.buffer = buf
   const hpf = ctx.createBiquadFilter()
@@ -142,13 +176,13 @@ function playWhoosh() {
   src.stop(ctx.currentTime + 0.3)
 }
 
-// Make sounds accessible globally for other components
 onMounted(() => {
   window.__avatrSound = { playClick, playWhoosh }
 })
 
 onUnmounted(() => {
   disable()
+  teardownRoomAmbient()
   ambientNodes.forEach(n => { try { n.disconnect() } catch (_) {} })
   delete window.__avatrSound
 })

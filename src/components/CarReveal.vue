@@ -30,16 +30,34 @@
       </div>
 
       <div class="car-reveal__text" ref="textBlock">
-        <img :src="emblemWhite" alt="" class="car-reveal__emblem" />
         <h2 class="car-reveal__title">Reveal Chamber</h2>
         <p class="car-reveal__subtitle">The real model. Only visible where the light passes.</p>
       </div>
 
+      <!-- Lights toggle button -->
+      <button
+        class="car-reveal__lights-btn glass-panel glass-panel--deep"
+        :class="{ 'car-reveal__lights-btn--on': lightsOn }"
+        @click="toggleLights"
+      >
+        {{ lightsOn ? 'Dim Lights' : 'Turn On Lights' }}
+      </button>
+
       <div class="car-reveal__specs" ref="specsEl">
-        <div v-for="spec in specChips" :key="spec.label" class="car-reveal__spec glass-panel glass-panel--deep">
-          <span class="car-reveal__spec-value">{{ spec.value }}</span>
-          <span class="car-reveal__spec-label">{{ spec.label }}</span>
-        </div>
+        <button
+          class="car-reveal__specs-toggle glass-panel glass-panel--deep"
+          @click="showSpecs = !showSpecs"
+        >
+          {{ showSpecs ? 'Hide Specs' : 'Show Specs' }}
+        </button>
+        <Transition name="specs-fade">
+          <div v-if="showSpecs" class="car-reveal__specs-grid">
+            <div v-for="spec in specChips" :key="spec.label" class="car-reveal__spec glass-panel glass-panel--deep">
+              <span class="car-reveal__spec-value">{{ spec.value }}</span>
+              <span class="car-reveal__spec-label">{{ spec.label }}</span>
+            </div>
+          </div>
+        </Transition>
       </div>
     </div>
   </section>
@@ -48,28 +66,26 @@
 <script setup>
 import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import * as THREE from 'three'
-import { Rhino3dmLoader } from 'three/examples/jsm/loaders/3DMLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
-import emblemWhite from '../assets/avatr-logo-emblem-white.png'
-import modelUrl from '../assets/avatr-011-model.3dm?url'
-
-gsap.registerPlugin(ScrollTrigger)
+import modelUrl from '../assets/avatr-011-model.glb?url'
 
 const section = ref(null)
 const canvas = ref(null)
 const textBlock = ref(null)
 const specsEl = ref(null)
 const loading = ref(true)
+const lightsOn = ref(false)
+const showSpecs = ref(false)
 const revealRadius = ref(150)
 const pointer = reactive({ x: 240, y: 240 })
 
 const specChips = [
-  { value: 'Rotate', label: 'Interactive Model' },
-  { value: 'Sweep', label: 'Cursor Light' },
-  { value: 'Scroll', label: 'Unlock Specs' },
-  { value: 'AVATR 011', label: 'Reveal Focus' },
+  { value: '3.9s', label: '0-100 km/h' },
+  { value: '578 HP', label: 'Dual Motor AWD' },
+  { value: '700 km', label: 'CLTC Range' },
+  { value: '730 Nm', label: 'Peak Torque' },
 ]
 
 let renderer = null
@@ -77,10 +93,13 @@ let scene = null
 let camera = null
 let modelRoot = null
 let spotlight = null
+let ambientLight = null
+let rimLight = null
+let fillLight = null
 let floor = null
 let animId = null
-let gsapCtx = null
-const progress = { value: 0 }
+
+const sceneState = { fogDensity: 0.18, ambientIntensity: 0.1, rimIntensity: 0.3, fillIntensity: 0.1 }
 
 const drag = reactive({ active: false, startX: 0, rotationY: 0 })
 
@@ -113,6 +132,34 @@ function handlePointerLeave() {
   drag.active = false
 }
 
+function toggleLights() {
+  lightsOn.value = !lightsOn.value
+
+  if (lightsOn.value) {
+    // Lights ON: reduce fog, increase ambient/rim/fill
+    gsap.to(sceneState, {
+      fogDensity: 0.04,
+      ambientIntensity: 0.6,
+      rimIntensity: 2.2,
+      fillIntensity: 0.6,
+      duration: 2,
+      ease: 'power2.out',
+    })
+  } else {
+    // Lights OFF: dense fog, dim everything
+    gsap.to(sceneState, {
+      fogDensity: 0.18,
+      ambientIntensity: 0.1,
+      rimIntensity: 0.3,
+      fillIntensity: 0.1,
+      duration: 1.5,
+      ease: 'power2.inOut',
+    })
+  }
+
+  window.__avatrSound?.playClick()
+}
+
 function buildScene() {
   const width = canvas.value.clientWidth || window.innerWidth
   const height = canvas.value.clientHeight || window.innerHeight
@@ -127,30 +174,35 @@ function buildScene() {
 
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0x050507)
-  scene.fog = new THREE.FogExp2(0x050507, 0.12)
+  scene.fog = new THREE.FogExp2(0x050507, sceneState.fogDensity)
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100)
   camera.position.set(0, 2.3, 9)
   camera.lookAt(0, 1, 0)
 
-  const ambient = new THREE.AmbientLight(0x1c1c28, 0.42)
-  scene.add(ambient)
+  // Dim ambient — car barely visible in fog
+  ambientLight = new THREE.AmbientLight(0x1c1c28, sceneState.ambientIntensity)
+  scene.add(ambientLight)
 
-  const rimLight = new THREE.DirectionalLight(0xc8a96e, 1.7)
+  // Dim rim light
+  rimLight = new THREE.DirectionalLight(0xc8a96e, sceneState.rimIntensity)
   rimLight.position.set(4, 6, -4)
   scene.add(rimLight)
 
-  const fillLight = new THREE.DirectionalLight(0x95b7ff, 0.4)
+  // Dim fill light
+  fillLight = new THREE.DirectionalLight(0x95b7ff, sceneState.fillIntensity)
   fillLight.position.set(-4, 2, 5)
   scene.add(fillLight)
 
-  spotlight = new THREE.SpotLight(0xfff4e4, 6, 30, Math.PI / 4.5, 0.8, 1.4)
+  // Cursor-tracking spotlight — the main reveal tool
+  spotlight = new THREE.SpotLight(0xfff4e4, 8, 30, Math.PI / 4.5, 0.8, 1.4)
   spotlight.position.set(0, 8, 6)
   spotlight.castShadow = true
   spotlight.target.position.set(0, 0, 0)
   scene.add(spotlight)
   scene.add(spotlight.target)
 
+  // Metallic floor
   const floorGeo = new THREE.CircleGeometry(12, 80)
   const floorMat = new THREE.MeshStandardMaterial({
     color: 0x090910,
@@ -163,14 +215,14 @@ function buildScene() {
   floor.receiveShadow = true
   scene.add(floor)
 
-  const loader = new Rhino3dmLoader()
-  loader.setLibraryPath('/rhino3dm/')
+  // Load GLB model
+  const loader = new GLTFLoader()
 
   loader.load(
     modelUrl,
-    (object) => {
+    (gltf) => {
       modelRoot = new THREE.Group()
-      modelRoot.add(object)
+      modelRoot.add(gltf.scene)
       scene.add(modelRoot)
 
       const box = new THREE.Box3().setFromObject(modelRoot)
@@ -179,7 +231,7 @@ function buildScene() {
       box.getSize(size)
       box.getCenter(center)
 
-      object.position.sub(center)
+      gltf.scene.position.sub(center)
       const maxAxis = Math.max(size.x, size.y, size.z) || 1
       const targetSize = 5.8
       const scale = targetSize / maxAxis
@@ -231,53 +283,34 @@ function buildScene() {
     const nx = (pointer.x / widthNow) * 2 - 1
     const ny = -(pointer.y / heightNow) * 2 + 1
 
+    // Spotlight follows cursor
     spotlight.position.x = nx * 5.2
     spotlight.position.z = 6 + ny * 1.4
     spotlight.target.position.x = nx * 2.4
     spotlight.target.position.y = 0.8 + ny * 1.4
 
-    revealRadius.value = 120 + progress.value * 190
+    revealRadius.value = lightsOn.value ? 400 : 150
 
+    // Apply animated scene state
+    scene.fog.density = sceneState.fogDensity
+    ambientLight.intensity = sceneState.ambientIntensity
+    rimLight.intensity = sceneState.rimIntensity
+    fillLight.intensity = sceneState.fillIntensity
+
+    // Auto-rotate when not dragging
     if (modelRoot && !drag.active) {
       modelRoot.rotation.y += 0.0025
     }
-
-    camera.position.z = 9 - progress.value * 1.8
-    spotlight.intensity = 5 + progress.value * 8
 
     renderer.render(scene, camera)
   }
   render()
 
-  gsapCtx = gsap.context(() => {
-    gsap.set(textBlock.value, { opacity: 0, y: 24 })
-    gsap.set(specsEl.value, { opacity: 0, y: 18 })
-
-    gsap.to(progress, {
-      value: 1,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section.value,
-        start: 'top top',
-        end: '+=190%',
-        scrub: 1.2,
-        pin: true,
-        onUpdate(self) {
-          if (self.progress > 0.28) {
-            gsap.to(textBlock.value, { opacity: 1, y: 0, duration: 0.45, overwrite: 'auto' })
-          } else {
-            gsap.to(textBlock.value, { opacity: 0, y: 24, duration: 0.25, overwrite: 'auto' })
-          }
-
-          if (self.progress > 0.62) {
-            gsap.to(specsEl.value, { opacity: 1, y: 0, duration: 0.45, overwrite: 'auto' })
-          } else {
-            gsap.to(specsEl.value, { opacity: 0, y: 18, duration: 0.25, overwrite: 'auto' })
-          }
-        },
-      },
-    })
-  }, section.value)
+  // Fade in text block on mount
+  gsap.fromTo(textBlock.value,
+    { opacity: 0, y: 24 },
+    { opacity: 1, y: 0, duration: 1, delay: 0.5, ease: 'power3.out' }
+  )
 
   renderer._disposeReveal = () => {
     window.removeEventListener('resize', onResize)
@@ -298,7 +331,6 @@ onMounted(() => {
 onUnmounted(() => {
   if (animId) cancelAnimationFrame(animId)
   renderer?._disposeReveal?.()
-  gsapCtx?.revert()
 })
 </script>
 
@@ -422,10 +454,27 @@ onUnmounted(() => {
   transform: translateX(-50%);
   z-index: 5;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.car-reveal__specs-toggle {
+  padding: 10px 24px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.car-reveal__specs-grid {
+  display: flex;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
-  padding: 0 20px;
 }
 
 .car-reveal__spec {
@@ -447,6 +496,44 @@ onUnmounted(() => {
   font-size: 0.6rem;
   letter-spacing: 0.14em;
   color: var(--color-muted);
+  text-transform: uppercase;
+}
+
+/* Lights toggle button */
+.car-reveal__lights-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 5;
+  padding: 12px 24px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.car-reveal__lights-btn--on {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(200,169,110,0.15);
+}
+
+/* Specs fade transition */
+.specs-fade-enter-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.specs-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.specs-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.specs-fade-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: 900px) {

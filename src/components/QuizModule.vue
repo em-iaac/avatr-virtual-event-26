@@ -66,6 +66,8 @@ import quizData from '../data/quiz.json'
 const questions = quizData.questions
 const results = quizData.results
 
+const emit = defineEmits(['quiz-complete'])
+
 const currentQ = ref(0)
 const selectedOption = ref(null)
 const showResult = ref(false)
@@ -107,6 +109,7 @@ function selectOption(i) {
       selectedOption.value = null
     } else {
       showResult.value = true
+      emit('quiz-complete')
     }
   }, 400)
 }
