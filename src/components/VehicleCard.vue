@@ -1,9 +1,13 @@
 <template>
   <TiltCard class="vehicle-card">
     <div class="vehicle-card__image-wrap">
-      <div class="vehicle-card__image-placeholder">
-        <span class="vehicle-card__image-label">{{ vehicle.name }}</span>
-      </div>
+      <img
+        :src="imageSrc"
+        :alt="vehicle.name"
+        class="vehicle-card__image"
+        loading="lazy"
+      />
+      <div class="vehicle-card__image-overlay"></div>
     </div>
     <div class="vehicle-card__body">
       <span class="vehicle-card__type">{{ vehicle.type }}</span>
@@ -29,14 +33,23 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import TiltCard from './TiltCard.vue'
 import MagneticButton from './MagneticButton.vue'
 
-defineProps({
+const props = defineProps({
   vehicle: { type: Object, required: true },
 })
 
 defineEmits(['explore'])
+
+// Dynamic import for Vite asset handling
+const imageModules = import.meta.glob('../assets/avatr-*.png', { eager: true })
+
+const imageSrc = computed(() => {
+  const key = Object.keys(imageModules).find(k => k.includes(props.vehicle.image))
+  return key ? imageModules[key].default : ''
+})
 </script>
 
 <style scoped>
@@ -49,32 +62,44 @@ defineEmits(['explore'])
 }
 
 .vehicle-card:hover {
-  border-color: rgba(200, 169, 110, 0.2);
+  border-color: rgba(200, 169, 110, 0.25);
 }
 
 .vehicle-card__image-wrap {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+  position: relative;
+  background: linear-gradient(135deg, #0a0a0a 0%, #111 100%);
 }
 
-.vehicle-card__image-placeholder {
+.vehicle-card__image {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(200, 169, 110, 0.03) 0%, transparent 60%);
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.vehicle-card__image-label {
-  font-family: var(--font-display);
-  font-size: var(--text-h3);
-  font-weight: 300;
-  letter-spacing: 0.2em;
-  color: rgba(240, 240, 240, 0.1);
-  text-transform: uppercase;
+.vehicle-card:hover .vehicle-card__image {
+  transform: scale(1.06);
+}
+
+.vehicle-card__image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(20, 20, 20, 0.8) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.vehicle-card:hover .vehicle-card__image-overlay {
+  opacity: 1;
 }
 
 .vehicle-card__body {

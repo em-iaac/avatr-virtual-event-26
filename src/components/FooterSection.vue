@@ -3,19 +3,30 @@
     <div class="section__inner">
       <div class="footer__top">
         <div class="footer__brand">
-          <span class="footer__wordmark">AVATR</span>
+          <img :src="textLogo" alt="AVATR" class="footer__logo" />
           <span class="footer__tagline">Intelligence Defines the Drive</span>
         </div>
         <div class="footer__links">
-          <a
-            v-for="(url, platform) in BRAND.social"
-            :key="platform"
-            :href="url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="footer__social-link"
-          >
-            {{ platform }}
+          <!-- Instagram -->
+          <a :href="BRAND.social.instagram" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5"/>
+              <circle cx="12" cy="12" r="5"/>
+              <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+          <!-- X / Twitter -->
+          <a :href="BRAND.social.twitter" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="X">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </a>
+          <!-- YouTube -->
+          <a :href="BRAND.social.youtube" target="_blank" rel="noopener noreferrer" class="footer__social-link" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="4"/>
+              <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/>
+            </svg>
           </a>
         </div>
       </div>
@@ -34,6 +45,7 @@
 
 <script setup>
 import { BRAND } from '../config.js'
+import textLogo from '../assets/avatr-text-logo-white.png'
 </script>
 
 <style scoped>
@@ -54,15 +66,14 @@ import { BRAND } from '../config.js'
 .footer__brand {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.footer__wordmark {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  color: var(--color-text);
+.footer__logo {
+  height: 20px;
+  width: auto;
+  opacity: 0.8;
+  filter: brightness(1.2);
 }
 
 .footer__tagline {
@@ -73,25 +84,30 @@ import { BRAND } from '../config.js'
 
 .footer__links {
   display: flex;
-  gap: 24px;
+  gap: 20px;
 }
 
 .footer__social-link {
-  font-size: var(--text-caption);
-  letter-spacing: 0.1em;
-  text-transform: capitalize;
+  width: 22px;
+  height: 22px;
   color: var(--color-muted);
-  transition: color var(--duration-fast) ease;
+  transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
 }
 
 .footer__social-link:hover {
   color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.footer__social-link svg {
+  width: 100%;
+  height: 100%;
 }
 
 .footer__divider {
   width: 100%;
   height: 1px;
-  background: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(90deg, transparent, rgba(200, 169, 110, 0.1), transparent);
   margin: 32px 0;
 }
 

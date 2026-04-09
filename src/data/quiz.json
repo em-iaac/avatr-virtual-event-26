@@ -1,0 +1,67 @@
+{
+  "questions": [
+    {
+      "question": "What's your ideal weekend drive?",
+      "options": [
+        { "text": "A mountain road with sweeping views", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-07": 2 } },
+        { "text": "A coastal highway at sunset", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-07": 2 } },
+        { "text": "Exploring hidden city streets", "scores": { "avatr-11": 1, "avatr-12": 2, "avatr-07": 3 } }
+      ]
+    },
+    {
+      "question": "What matters most in a vehicle?",
+      "options": [
+        { "text": "Commanding presence and space", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-07": 1 } },
+        { "text": "Elegant design and refinement", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-07": 1 } },
+        { "text": "Agility and smart tech", "scores": { "avatr-11": 1, "avatr-12": 1, "avatr-07": 3 } }
+      ]
+    },
+    {
+      "question": "Pick a word that describes you",
+      "options": [
+        { "text": "Adventurous", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-07": 2 } },
+        { "text": "Sophisticated", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-07": 1 } },
+        { "text": "Dynamic", "scores": { "avatr-11": 2, "avatr-12": 1, "avatr-07": 3 } }
+      ]
+    },
+    {
+      "question": "Your dream destination?",
+      "options": [
+        { "text": "Swiss Alps — wide open grandeur", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-07": 1 } },
+        { "text": "Monaco — luxury and precision", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-07": 2 } },
+        { "text": "Tokyo — energy and innovation", "scores": { "avatr-11": 1, "avatr-12": 2, "avatr-07": 3 } }
+      ]
+    },
+    {
+      "question": "How do you start your morning?",
+      "options": [
+        { "text": "An early hike before the world wakes", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-07": 2 } },
+        { "text": "Espresso with a curated playlist", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-07": 1 } },
+        { "text": "Quick workout then straight to action", "scores": { "avatr-11": 1, "avatr-12": 1, "avatr-07": 3 } }
+      ]
+    }
+  ],
+  "results": {
+    "avatr-11": {
+      "name": "AVATR 11",
+      "type": "Luxury SUV",
+      "tagline": "Where Intelligence Meets Elegance",
+      "description": "You're drawn to presence, space, and the freedom of the open road. The AVATR 11 matches your adventurous spirit with commanding luxury.",
+      "image": "avatr-011.png"
+    },
+    "avatr-12": {
+      "name": "AVATR 12",
+      "type": "Executive Sedan",
+      "tagline": "Redefining the Art of Motion",
+      "description": "Refined taste, an eye for design, and appreciation for the finer things. The AVATR 12 is your perfect expression of sophisticated motion.",
+      "image": "avatr-012.png"
+    },
+    "avatr-07": {
+      "name": "AVATR 07",
+      "type": "Compact SUV",
+      "tagline": "Born for the Urban Frontier",
+      "description": "Dynamic, tech-forward, and always in motion. The AVATR 07 keeps up with your urban energy and smart lifestyle.",
+      "image": "avatr-06.png"
+    }
+  }
+}

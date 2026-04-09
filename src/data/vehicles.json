@@ -4,11 +4,11 @@
     "name": "AVATR 11",
     "type": "Luxury SUV",
     "tagline": "Where Intelligence Meets Elegance",
-    "image": "/images/avatr-11.jpg",
+    "image": "avatr-011.png",
     "specs": {
       "power": { "value": 578, "unit": "HP", "label": "Peak Power" },
       "range": { "value": 680, "unit": "km", "label": "CLTC Range" },
-      "acceleration": { "value": 3.98, "unit": "s", "label": "0–100 km/h" },
+      "acceleration": { "value": 3.98, "unit": "s", "label": "0\u2013100 km/h" },
       "torque": { "value": 730, "unit": "Nm", "label": "Peak Torque" }
     },
     "highlights": [
@@ -22,11 +22,11 @@
     "name": "AVATR 12",
     "type": "Executive Sedan",
     "tagline": "Redefining the Art of Motion",
-    "image": "/images/avatr-12.jpg",
+    "image": "avatr-012.png",
     "specs": {
       "power": { "value": 578, "unit": "HP", "label": "Peak Power" },
       "range": { "value": 700, "unit": "km", "label": "CLTC Range" },
-      "acceleration": { "value": 3.9, "unit": "s", "label": "0–100 km/h" },
+      "acceleration": { "value": 3.9, "unit": "s", "label": "0\u2013100 km/h" },
       "torque": { "value": 730, "unit": "Nm", "label": "Peak Torque" }
     },
     "highlights": [
@@ -40,11 +40,11 @@
     "name": "AVATR 07",
     "type": "Compact SUV",
     "tagline": "Born for the Urban Frontier",
-    "image": "/images/avatr-07.jpg",
+    "image": "avatr-06.png",
     "specs": {
       "power": { "value": 425, "unit": "HP", "label": "Peak Power" },
       "range": { "value": 620, "unit": "km", "label": "CLTC Range" },
-      "acceleration": { "value": 4.5, "unit": "s", "label": "0–100 km/h" },
+      "acceleration": { "value": 4.5, "unit": "s", "label": "0\u2013100 km/h" },
       "torque": { "value": 650, "unit": "Nm", "label": "Peak Torque" }
     },
     "highlights": [
