@@ -62,12 +62,63 @@
         </form>
 
         <!-- Success state -->
+        <!-- Success: personalized premiere invite card -->
         <div v-else class="signup__success">
-          <div class="signup__success-icon">&#10003;</div>
-          <h3 class="signup__success-title">You're In</h3>
-          <p class="signup__success-text">
-            We'll see you at the premiere on May 1st at 8:00 PM Kuwait time.
-          </p>
+          <div class="signup__invite-card glass-panel glass-panel--deep" ref="inviteCard">
+            <!-- Card top shimmer line -->
+            <div class="signup__invite-shimmer"></div>
+
+            <!-- Header row -->
+            <div class="signup__invite-header">
+              <img :src="emblemWhite" alt="AVATR" class="signup__invite-emblem" />
+              <span class="signup__invite-event">Virtual Event 2026</span>
+            </div>
+
+            <!-- Name -->
+            <div class="signup__invite-name-wrap">
+              <span class="signup__invite-prefix">This seat belongs to</span>
+              <h3 class="signup__invite-name">{{ firstName }}</h3>
+            </div>
+
+            <!-- Date / Time / Region -->
+            <div class="signup__invite-details">
+              <div class="signup__invite-detail">
+                <span class="signup__invite-detail-label">Date</span>
+                <span class="signup__invite-detail-value">May 1, 2026</span>
+              </div>
+              <div class="signup__invite-divider-v"></div>
+              <div class="signup__invite-detail">
+                <span class="signup__invite-detail-label">Time</span>
+                <span class="signup__invite-detail-value">8:00 PM KWT</span>
+              </div>
+              <div class="signup__invite-divider-v"></div>
+              <div class="signup__invite-detail">
+                <span class="signup__invite-detail-label">Platform</span>
+                <span class="signup__invite-detail-value">YouTube Live</span>
+              </div>
+            </div>
+
+            <!-- Bottom tagline -->
+            <p class="signup__invite-tag">Emotional Intelligence. Motion in Delight.</p>
+
+            <!-- Decorative corner diamonds -->
+            <svg class="signup__invite-corner signup__invite-corner--tl" viewBox="0 0 32 32" fill="none">
+              <path d="M16 2 L30 16 L16 30 L2 16 Z" stroke="rgba(200,169,110,0.4)" stroke-width="0.8"/>
+              <path d="M16 6 L26 16 L16 26 L6 16 Z" stroke="rgba(200,169,110,0.2)" stroke-width="0.5"/>
+            </svg>
+            <svg class="signup__invite-corner signup__invite-corner--br" viewBox="0 0 32 32" fill="none">
+              <path d="M16 2 L30 16 L16 30 L2 16 Z" stroke="rgba(200,169,110,0.4)" stroke-width="0.8"/>
+              <path d="M16 6 L26 16 L16 26 L6 16 Z" stroke="rgba(200,169,110,0.2)" stroke-width="0.5"/>
+            </svg>
+          </div>
+
+          <!-- Share CTA -->
+          <div class="signup__share-row">
+            <MagneticButton class="signup__share-btn" @click="handleShare">
+              {{ shared ? 'Copied! ✓' : 'Share Your Seat' }}
+            </MagneticButton>
+            <p class="signup__share-hint">Screenshot, share, and make them curious.</p>
+          </div>
         </div>
       </ScrollReveal>
     </div>
@@ -75,9 +126,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { gsap } from 'gsap'
 import { API } from '../config.js'
+import emblemWhite from '../assets/avatr-logo-emblem-white.png'
 import SectionHeading from './SectionHeading.vue'
 import ScrollReveal from './ScrollReveal.vue'
 import MagneticButton from './MagneticButton.vue'
@@ -92,6 +144,13 @@ const form = ref({
 const submitted = ref(false)
 const isSubmitting = ref(false)
 const animatedCount = ref(0)
+const shared = ref(false)
+
+const firstName = computed(() => {
+  const raw = form.value.name?.trim()
+  if (!raw) return 'Future Driver'
+  return raw.split(' ')[0]
+})
 
 // Animated counter — seed with a base number
 const BASE_COUNT = 1247
@@ -130,11 +189,42 @@ async function handleSubmit() {
       })
     }
     submitted.value = true
+    window.__avatrSound?.playWhoosh()
   } catch {
     // Silently succeed for now — form data captured on client
     submitted.value = true
   } finally {
     isSubmitting.value = false
+  }
+}
+
+async function handleShare() {
+  const text = `${firstName.value} has a seat at the AVATR Virtual Event on May 1, 2026, 8:00 PM Kuwait. See you on YouTube Live.`
+  const url = window.location.href
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'AVATR Virtual Event 2026',
+        text,
+        url,
+      })
+      shared.value = true
+    } catch {
+      // User canceled share sheet; ignore.
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`)
+      shared.value = true
+    } catch {
+      // Clipboard blocked.
+    }
+  }
+
+  if (shared.value) {
+    window.__avatrSound?.playClick()
+    setTimeout(() => { shared.value = false }, 1800)
   }
 }
 </script>
@@ -233,38 +323,161 @@ async function handleSubmit() {
 
 /* Success state */
 .signup__success {
-  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 40px;
+  gap: 20px;
 }
 
-.signup__success-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  color: var(--color-bg);
+/* Personalized invite card */
+.signup__invite-card {
+  position: relative;
+  width: min(560px, 92vw);
+  padding: clamp(18px, 3vw, 30px);
+  overflow: hidden;
+}
+
+.signup__invite-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg,
+    transparent 0%,
+    rgba(255,255,255,0.05) 30%,
+    rgba(200,169,110,0.12) 50%,
+    rgba(255,255,255,0.05) 70%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: inviteShimmer 6s linear infinite;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.signup__invite-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
-.signup__success-title {
+.signup__invite-emblem {
+  width: 24px;
+  height: auto;
+  opacity: 0.7;
+}
+
+.signup__invite-event {
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.signup__invite-name-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.signup__invite-prefix {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.signup__invite-name {
   font-family: var(--font-display);
-  font-size: var(--text-h3);
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  line-height: 1.05;
+  font-weight: 300;
+  letter-spacing: 0.03em;
   color: var(--color-text);
 }
 
-.signup__success-text {
-  font-size: var(--text-body);
+.signup__invite-details {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.signup__invite-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signup__invite-detail-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--color-muted);
-  max-width: 350px;
+}
+
+.signup__invite-detail-value {
+  font-family: var(--font-display);
+  font-size: clamp(0.8rem, 1.7vw, 0.95rem);
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+}
+
+.signup__invite-divider-v {
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(200,169,110,0.3), transparent);
+}
+
+.signup__invite-tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: rgba(200, 169, 110, 0.8);
+}
+
+.signup__invite-corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.signup__invite-corner--tl {
+  top: 10px;
+  left: 10px;
+}
+
+.signup__invite-corner--br {
+  bottom: 10px;
+  right: 10px;
+}
+
+/* Share row */
+.signup__share-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.signup__share-hint {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+  .signup__invite-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .signup__invite-divider-v {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(200,169,110,0.25), transparent);
+  }
 }
 </style>

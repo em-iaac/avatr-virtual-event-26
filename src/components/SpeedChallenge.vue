@@ -150,7 +150,13 @@
               Save Score
             </MagneticButton>
           </form>
-          <p v-else class="speed__submitted-msg">Score saved! Check the leaderboard below.</p>
+          <div v-else class="speed__submitted-wrap">
+            <p class="speed__submitted-msg">Score saved! Check the leaderboard below.</p>
+            <p v-if="playerRank" class="speed__submitted-rank">You are currently #{{ playerRank }} this week.</p>
+            <MagneticButton class="speed__share-btn" @click="shareScore">
+              {{ copiedShare ? 'Copied!' : 'Share My Time' }}
+            </MagneticButton>
+          </div>
 
           <MagneticButton class="speed__retry-btn" @click="resetGame">
             Try Again
@@ -231,6 +237,7 @@ const playerEmail = ref('')
 const scoreSubmitted = ref(false)
 const leaderboard = ref([])
 const particlesEl = ref(null)
+const copiedShare = ref(false)
 
 let lightTimers = []
 let goTimeout = null
@@ -271,6 +278,12 @@ const resultTier = computed(() => {
 const isTopScore = computed(() => {
   if (leaderboard.value.length < 3) return true
   return reactionTime.value < parseFloat(leaderboard.value[2]?.score || 999)
+})
+
+const playerRank = computed(() => {
+  if (!scoreSubmitted.value || !playerName.value) return null
+  const idx = leaderboard.value.findIndex((entry) => entry.name === playerName.value && String(entry.score) === String(reactionTime.value))
+  return idx === -1 ? null : idx + 1
 })
 
 function startGame() {
@@ -324,6 +337,7 @@ function resetGame() {
   playerEmail.value = ''
   scoreSubmitted.value = false
   carLaunched.value = false
+  copiedShare.value = false
 }
 
 function clearAllTimers() {
@@ -369,8 +383,40 @@ async function submitScore() {
     leaderboard.value.push({ name: playerName.value, score: String(reactionTime.value) })
     leaderboard.value.sort((a, b) => parseFloat(a.score) - parseFloat(b.score))
     leaderboard.value = leaderboard.value.slice(0, 10)
+    window.__avatrSound?.playWhoosh()
   } catch {
     scoreSubmitted.value = true
+  }
+}
+
+async function shareScore() {
+  const rankText = playerRank.value ? `Rank #${playerRank.value}` : 'Leaderboard contender'
+  const text = `I just clocked ${reactionTime.value}ms in the AVATR Reaction Challenge (${rankText}). Can you beat me?`
+  const url = window.location.href
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'AVATR Reaction Challenge',
+        text,
+        url,
+      })
+      copiedShare.value = true
+    } catch {
+      // ignore canceled share dialog
+    }
+  } else {
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`)
+      copiedShare.value = true
+    } catch {
+      // ignore clipboard failure
+    }
+  }
+
+  if (copiedShare.value) {
+    window.__avatrSound?.playClick()
+    setTimeout(() => { copiedShare.value = false }, 1800)
   }
 }
 
@@ -406,6 +452,24 @@ onUnmounted(() => {
 <style scoped>
 .speed {
   background-color: var(--color-bg);
+}
+
+.speed__submitted-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.speed__submitted-rank {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.speed__share-btn {
+  min-width: 180px;
 }
 
 /* â”€â”€ Prize Banner â”€â”€ */

@@ -6,22 +6,23 @@
   <FloatingDiamonds />
   <NavDots />
   <CursorGlow />
+  <SoundManager />
 
   <div id="smooth-wrapper">
     <HeroSection />
-    <SectionDivider variant="diamond" />
+    <SectionDivider variant="line" />
     <BrandStory />
-    <SectionDivider variant="dots" />
+    <SectionDivider variant="diamond" />
     <CarReveal />
+    <SectionDivider variant="dots" />
+    <PerformanceStats />
+    <SectionDivider variant="line" />
+    <SpeedChallenge />
+    <SectionDivider variant="diamond" />
+    <QuizModule />
     <SectionDivider variant="line" />
     <VehicleLineup />
-    <SectionDivider variant="diamond" />
-    <PerformanceStats />
     <SectionDivider variant="dots" />
-    <SpeedChallenge />
-    <SectionDivider variant="line" />
-    <QuizModule />
-    <SectionDivider variant="diamond" />
     <SignupSection />
     <FooterSection />
   </div>
@@ -37,6 +38,7 @@ import SiteLoader from './components/SiteLoader.vue'
 import FloatingDiamonds from './components/FloatingDiamonds.vue'
 import NavDots from './components/NavDots.vue'
 import CursorGlow from './components/CursorGlow.vue'
+import SoundManager from './components/SoundManager.vue'
 import HeroSection from './components/HeroSection.vue'
 import BrandStory from './components/BrandStory.vue'
 import CarReveal from './components/CarReveal.vue'
