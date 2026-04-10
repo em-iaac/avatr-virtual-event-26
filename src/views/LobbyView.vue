@@ -27,6 +27,12 @@
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+          </filter>
+        </defs>
+
         <!-- Outer rectangle (structural frame) -->
         <rect
           x="60" y="40" width="280" height="480" rx="4"
@@ -103,6 +109,7 @@
             'lobby__segment--active': hoveredRoom === 'invitation',
             'lobby__segment--locked': !invitationUnlocked
           }"
+          :filter="!invitationUnlocked ? 'url(#frostedLock)' : undefined"
           @mouseenter="hoveredRoom = 'invitation'"
           @mouseleave="hoveredRoom = null"
           @click="enterInvitation"
@@ -111,24 +118,31 @@
             d="M 60 520 L 200 320 L 340 520 Z"
             class="lobby__segment-fill"
           />
+          <!-- Semi-transparent frost overlay -->
+          <path
+            v-if="!invitationUnlocked"
+            d="M 60 520 L 200 320 L 340 520 Z"
+            fill="rgba(6,6,8,0.55)"
+          />
           <path
             d="M 60 520 L 200 320 L 340 520"
             stroke="var(--color-accent)" stroke-width="1.2" fill="none"
             class="lobby__segment-stroke"
           />
 
-          <!-- Lock icon for locked state -->
-          <g v-if="!invitationUnlocked" class="lobby__lock-icon">
-            <rect x="190" y="395" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" />
-            <path d="M194 395 V389 A6 6 0 0 1 206 389 V395" stroke="currentColor" stroke-width="1.2" fill="none" />
-          </g>
-
-          <text x="200" y="430" text-anchor="middle" class="lobby__room-label">
+          <text x="200" y="440" text-anchor="middle" class="lobby__room-label">
             {{ invitationUnlocked ? 'Invitation' : 'Locked' }}
           </text>
-          <text x="200" y="450" text-anchor="middle" class="lobby__room-sublabel">
+          <text x="200" y="458" text-anchor="middle" class="lobby__room-sublabel">
             {{ invitationUnlocked ? 'RSVP & Exclusive' : 'Complete the Quiz' }}
           </text>
+        </g>
+
+        <!-- Large centered lock icon (rendered outside filtered group so it stays sharp) -->
+        <g v-if="!invitationUnlocked" class="lobby__lock-icon" @click="enterInvitation">
+          <rect x="184" y="385" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <path d="M190 385 V377 A10 10 0 0 1 210 377 V385" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <circle cx="200" cy="398" r="2.5" fill="currentColor" />
         </g>
 
         <!-- Center diamond intersection point -->
@@ -149,11 +163,17 @@
         v-for="room in mobileRooms"
         :key="room.route"
         class="lobby__mobile-card glass-panel glass-panel--deep"
+        :class="{ 'lobby__mobile-card--locked': room.locked }"
         @click="room.locked ? enterInvitation() : enterRoom(room.route)"
       >
         <span class="lobby__mobile-label">{{ room.label }}</span>
         <span class="lobby__mobile-sub">{{ room.sub }}</span>
-        <span v-if="room.locked" class="lobby__mobile-lock">🔒</span>
+        <span v-if="room.locked" class="lobby__mobile-lock">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </span>
       </button>
     </div>
 
@@ -161,6 +181,26 @@
     <div class="lobby__footer">
       <p class="lobby__footer-text">Premiering May 1, 2026 · 8:00 PM Kuwait</p>
     </div>
+
+    <!-- Lock Modal -->
+    <Transition name="modal-fade">
+      <div v-if="showLockModal" class="lobby__lock-overlay" @click.self="showLockModal = false">
+        <div class="lobby__lock-modal glass-panel glass-panel--deep">
+          <svg class="lobby__lock-modal-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          <h3 class="lobby__lock-modal-title">This Room Is Locked</h3>
+          <p class="lobby__lock-modal-text">
+            Complete the Knowledge Quiz in the Waiting Room to unlock your exclusive invitation.
+          </p>
+          <MagneticButton class="lobby__lock-modal-btn" @click="goToQuiz">
+            Go to Quiz
+          </MagneticButton>
+          <button class="lobby__lock-modal-dismiss" @click="showLockModal = false">Back</button>
+        </div>
+      </div>
+    </Transition>
   </section>
 </template>
 
@@ -169,6 +209,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { EVENT, getEventPhase } from '../config.js'
 import CountdownTimer from '../components/CountdownTimer.vue'
+import MagneticButton from '../components/MagneticButton.vue'
 
 import textLogoWhite from '../assets/avatr-text-logo-white.png'
 
@@ -176,6 +217,7 @@ const router = useRouter()
 const phase = ref(getEventPhase())
 const hoveredRoom = ref(null)
 const particles = ref(null)
+const showLockModal = ref(false)
 let animFrame = null
 let particleList = []
 
@@ -203,8 +245,23 @@ function enterRoom(routeName) {
 }
 
 function enterInvitation() {
+  if (!invitationUnlocked.value) {
+    window.__avatrSound?.playClick()
+    showLockModal.value = true
+    return
+  }
   window.__avatrSound?.playClick()
   router.push({ name: 'invitation' })
+}
+
+function goToQuiz() {
+  showLockModal.value = false
+  window.__avatrSound?.playWhoosh()
+  router.push({ name: 'waiting-room', query: { tab: 'quiz' } })
+}
+
+function onEscKey(e) {
+  if (e.key === 'Escape') showLockModal.value = false
 }
 
 function initParticles() {
@@ -272,11 +329,13 @@ function initParticles() {
 onMounted(() => {
   refreshLockState()
   document.addEventListener('visibilitychange', refreshLockState)
+  document.addEventListener('keydown', onEscKey)
   initParticles()
 })
 
 onUnmounted(() => {
   document.removeEventListener('visibilitychange', refreshLockState)
+  document.removeEventListener('keydown', onEscKey)
   if (animFrame) cancelAnimationFrame(animFrame)
 })
 </script>
@@ -424,44 +483,25 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked {
-  cursor: pointer;
+  cursor: not-allowed;
 }
 
 .lobby__segment--locked .lobby__segment-fill {
   fill: rgba(200, 169, 110, 0.03);
-  animation: lockedGlow 3s ease-in-out infinite;
 }
 
 .lobby__segment--locked .lobby__segment-stroke {
   stroke: var(--color-accent);
-  opacity: 0.4;
-  stroke-dasharray: 6 4;
-  animation: lockStrokePulse 3s ease-in-out infinite;
+  opacity: 0.2;
 }
 
 .lobby__segment--locked.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.1);
+  fill: rgba(200, 169, 110, 0.06);
 }
 
 .lobby__segment--locked .lobby__room-sublabel {
   opacity: 0.9;
   fill: var(--color-accent);
-  animation: lockTextPulse 2.5s ease-in-out infinite;
-}
-
-@keyframes lockedGlow {
-  0%, 100% { fill: rgba(200, 169, 110, 0.02); }
-  50% { fill: rgba(200, 169, 110, 0.07); }
-}
-
-@keyframes lockStrokePulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.65; }
-}
-
-@keyframes lockTextPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
 }
 
 .lobby__room-label {
@@ -551,7 +591,20 @@ onUnmounted(() => {
   right: 18px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.1rem;
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+/* Mobile locked card frost */
+.lobby__mobile-card--locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.lobby__mobile-card--locked .lobby__mobile-label {
+  color: var(--color-muted);
 }
 
 /* Footer */
@@ -565,6 +618,105 @@ onUnmounted(() => {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-muted);
+}
+
+/* Lock Modal */
+.lobby__lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 6, 8, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 20px;
+}
+
+.lobby__lock-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 40px 36px;
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
+}
+
+.lobby__lock-modal-icon {
+  opacity: 0.8;
+  filter: drop-shadow(0 0 12px rgba(200, 169, 110, 0.3));
+}
+
+.lobby__lock-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+}
+
+.lobby__lock-modal-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--color-muted);
+  max-width: 300px;
+}
+
+.lobby__lock-modal-btn {
+  margin-top: 8px;
+  padding: 14px 36px;
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-bg);
+  background: var(--color-accent);
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.lobby__lock-modal-btn:hover {
+  background: var(--color-accent-hover);
+}
+
+.lobby__lock-modal-dismiss {
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: color 0.3s ease;
+}
+
+.lobby__lock-modal-dismiss:hover {
+  color: var(--color-text);
+}
+
+/* Modal transition */
+.modal-fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+.modal-fade-enter-active .lobby__lock-modal {
+  animation: modalSlideUp 0.3s ease forwards;
+}
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (max-width: 768px) {
