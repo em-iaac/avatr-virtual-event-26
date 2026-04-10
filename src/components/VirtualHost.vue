@@ -43,7 +43,7 @@
     >
       <div class="host-mini__halo"></div>
       <img :src="hostFigure" alt="Ava" class="host-mini__image" />
-      <span class="host-mini__greeting">Hello, I'm your host</span>
+      <span class="host-mini__greeting">Hello</span>
     </button>
   </Transition>
 </template>
@@ -350,7 +350,8 @@ onUnmounted(() => {
   display: inline-block;
   overflow: hidden;
   max-width: 0;
-  animation: greetingReveal 1.2s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: greetingReveal 1.2s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+             greetingBreathe 3s 1.7s ease-in-out infinite;
 }
 
 @keyframes greetingReveal {
@@ -360,10 +361,15 @@ onUnmounted(() => {
     padding-right: 0;
   }
   to {
-    max-width: 200px;
+    max-width: 80px;
     opacity: 1;
     padding-right: 4px;
   }
+}
+
+@keyframes greetingBreathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 /* ── Overlay transition ── */

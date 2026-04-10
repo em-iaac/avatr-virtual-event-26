@@ -26,6 +26,7 @@
         viewBox="0 0 400 560"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        @click.self="hoveredRoom = null"
       >
         <defs>
           <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
@@ -197,8 +198,11 @@
         v-for="room in mobileRooms"
         :key="room.route"
         class="lobby__mobile-card glass-panel glass-panel--deep"
-        :class="{ 'lobby__mobile-card--locked': room.locked }"
-        @click="room.locked ? enterInvitation() : enterRoom(room.route)"
+        :class="{
+          'lobby__mobile-card--locked': room.locked,
+          'lobby__mobile-card--selected': hoveredRoom === room.key
+        }"
+        @click="room.locked ? enterInvitation() : enterRoom(room.route, room.key)"
       >
         <span class="lobby__mobile-label">{{ room.label }}</span>
         <span class="lobby__mobile-sub">{{ room.sub }}</span>
@@ -263,11 +267,12 @@ function refreshLockState() {
 }
 
 const mobileRooms = computed(() => [
-  { route: 'waiting-room', label: 'Waiting Room', sub: 'Games & History' },
-  { route: 'reveal-room', label: 'Reveal Room', sub: '3D Car Model' },
-  { route: 'watching-room', label: 'Premiere', sub: 'Watch the Show' },
+  { route: 'waiting-room', key: 'waiting', label: 'Waiting Room', sub: 'Games & History' },
+  { route: 'reveal-room', key: 'reveal', label: 'Reveal Room', sub: '3D Car Model' },
+  { route: 'watching-room', key: 'watching', label: 'Premiere', sub: 'Watch the Show' },
   {
     route: 'invitation',
+    key: 'invitation',
     label: invitationUnlocked.value ? 'Invitation' : 'Locked',
     sub: invitationUnlocked.value ? 'RSVP & Exclusive' : 'Complete the Quiz',
     locked: !invitationUnlocked.value,
@@ -518,6 +523,7 @@ onUnmounted(() => {
 .lobby__segment {
   cursor: pointer;
   transition: all 0.3s ease;
+  touch-action: manipulation;
 }
 
 .lobby__segment-fill {
@@ -808,6 +814,19 @@ onUnmounted(() => {
 
   .lobby__mobile-rooms {
     display: flex;
+  }
+
+  .lobby__mobile-card {
+    touch-action: manipulation;
+  }
+
+  .lobby__mobile-card--selected {
+    border-color: rgba(200, 169, 110, 0.5);
+    box-shadow: 0 0 16px rgba(200, 169, 110, 0.1);
+  }
+
+  .lobby__mobile-card--selected .lobby__mobile-label {
+    color: var(--color-accent);
   }
 }
 </style>
