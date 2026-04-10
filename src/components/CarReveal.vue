@@ -52,9 +52,15 @@
           :class="{ 'car-reveal__ctrl-btn--active': lightsOn }"
           @click="toggleLights"
         >
-          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path v-if="!lightsOn" d="M12 3v1M18.36 5.64l-.71.71M21 12h-1M18.36 18.36l-.71-.71M12 20v1M5.64 18.36l.71-.71M3 12h1M5.64 5.64l.71.71" stroke-linecap="round"/>
+          <!-- ON: filled sun with glow -->
+          <svg v-if="lightsOn" class="car-reveal__ctrl-icon car-reveal__ctrl-icon--glow" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
             <circle cx="12" cy="12" r="5"/>
+            <path d="M12 3v1M18.36 5.64l-.71.71M21 12h-1M18.36 18.36l-.71-.71M12 20v1M5.64 18.36l.71-.71M3 12h1M5.64 5.64l.71.71" stroke-linecap="round" fill="none"/>
+          </svg>
+          <!-- OFF: stroke-only sun -->
+          <svg v-else class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 3v1M18.36 5.64l-.71.71M21 12h-1M18.36 18.36l-.71-.71M12 20v1M5.64 18.36l.71-.71M3 12h1M5.64 5.64l.71.71" stroke-linecap="round"/>
           </svg>
           <span>{{ lightsOn ? 'Dim Lights' : 'Lights On' }}</span>
         </button>
@@ -65,7 +71,15 @@
           :class="{ 'car-reveal__ctrl-btn--active': showSpecs }"
           @click="showSpecs = !showSpecs"
         >
-          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <!-- ON: filled grid -->
+          <svg v-if="showSpecs" class="car-reveal__ctrl-icon car-reveal__ctrl-icon--glow" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <!-- OFF: stroke-only grid -->
+          <svg v-else class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="3" y="3" width="7" height="7" rx="1"/>
             <rect x="14" y="3" width="7" height="7" rx="1"/>
             <rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -80,11 +94,13 @@
           :class="{ 'car-reveal__ctrl-btn--active': soundOn }"
           @click="toggleSound"
         >
-          <svg v-if="soundOn" class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <!-- ON: filled speaker with waves -->
+          <svg v-if="soundOn" class="car-reveal__ctrl-icon car-reveal__ctrl-icon--glow" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
             <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none"/>
           </svg>
+          <!-- OFF: stroke-only speaker with X -->
           <svg v-else class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
             <line x1="22" y1="9" x2="16" y2="15"/>
@@ -508,6 +524,11 @@ onUnmounted(() => {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+  transition: filter 0.3s ease;
+}
+
+.car-reveal__ctrl-icon--glow {
+  filter: drop-shadow(0 0 4px rgba(200, 169, 110, 0.7)) drop-shadow(0 0 8px rgba(200, 169, 110, 0.35));
 }
 
 .car-reveal__ctrl-btn {
