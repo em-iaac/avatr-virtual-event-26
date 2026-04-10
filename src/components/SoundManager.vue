@@ -20,7 +20,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const enabled = ref(false)
+const enabled = ref(true)
 let ctx = null
 let masterGain = null
 let ambientNodes = []
@@ -178,6 +178,8 @@ function playWhoosh() {
 
 onMounted(() => {
   window.__avatrSound = { playClick, playWhoosh }
+  // Auto-enable sound on mount
+  enable()
 })
 
 onUnmounted(() => {
@@ -193,8 +195,8 @@ defineExpose({ toggle, enabled, playClick, playWhoosh })
 <style scoped>
 .sound-toggle {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
+  bottom: 120px;
+  left: 20px;
   z-index: 9000;
   display: flex;
   align-items: center;

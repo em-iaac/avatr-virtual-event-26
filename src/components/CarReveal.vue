@@ -78,7 +78,7 @@ const specsEl = ref(null)
 const loading = ref(true)
 const lightsOn = ref(false)
 const showSpecs = ref(false)
-const revealRadius = ref(150)
+const revealRadius = ref(280)
 const pointer = reactive({ x: 240, y: 240 })
 
 const specChips = [
@@ -177,7 +177,7 @@ function buildScene() {
   scene.fog = new THREE.FogExp2(0x050507, sceneState.fogDensity)
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100)
-  camera.position.set(0, 2.3, 9)
+  camera.position.set(0, 2.3, 7.5)
   camera.lookAt(0, 1, 0)
 
   // Dim ambient — car barely visible in fog
@@ -233,7 +233,7 @@ function buildScene() {
 
       gltf.scene.position.sub(center)
       const maxAxis = Math.max(size.x, size.y, size.z) || 1
-      const targetSize = 5.8
+      const targetSize = 8.5
       const scale = targetSize / maxAxis
       modelRoot.scale.setScalar(scale)
       modelRoot.position.y = -0.65
@@ -289,7 +289,7 @@ function buildScene() {
     spotlight.target.position.x = nx * 2.4
     spotlight.target.position.y = 0.8 + ny * 1.4
 
-    revealRadius.value = lightsOn.value ? 400 : 150
+    revealRadius.value = lightsOn.value ? 600 : 280
 
     // Apply animated scene state
     scene.fog.density = sceneState.fogDensity
@@ -502,8 +502,9 @@ onUnmounted(() => {
 /* Lights toggle button */
 .car-reveal__lights-btn {
   position: absolute;
-  bottom: 24px;
-  right: 24px;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 5;
   padding: 12px 24px;
   font-family: var(--font-display);
