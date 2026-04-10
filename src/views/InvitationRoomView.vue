@@ -141,11 +141,19 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { gsap } from 'gsap'
 import { EVENT, API } from '../config.js'
 import MagneticButton from '../components/MagneticButton.vue'
 import emblemWhite from '../assets/avatr-logo-emblem-white.png'
 import textLogoWhite from '../assets/avatr-text-logo-white.png'
+
+const router = useRouter()
+
+// Safety check: redirect if quiz not completed (belt-and-suspenders with router guard)
+if (!localStorage.getItem('avatr-quiz-completed')) {
+  router.replace({ name: 'waiting-room', query: { tab: 'quiz', locked: '1' } })
+}
 
 const invitationCard = ref(null)
 const showRsvp = ref(false)

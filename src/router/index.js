@@ -36,12 +36,9 @@ const routes = [
     name: 'invitation',
     component: InvitationRoomView,
     meta: { room: 'invitation' },
-    beforeEnter: (to, from, next) => {
-      const earned = localStorage.getItem('avatr-quiz-completed')
-      if (earned) {
-        next()
-      } else {
-        next({ name: 'waiting-room', query: { tab: 'quiz', locked: '1' } })
+    beforeEnter: () => {
+      if (!localStorage.getItem('avatr-quiz-completed')) {
+        return { name: 'waiting-room', query: { tab: 'quiz', locked: '1' } }
       }
     },
   },
