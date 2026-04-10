@@ -182,8 +182,52 @@ function playWhoosh() {
   src.stop(ctx.currentTime + 0.3)
 }
 
+function playCorrect() {
+  if (!ctx || !enabled.value) return
+  const now = ctx.currentTime
+  // Ascending two-tone chime (E5 → A5)
+  const g1 = ctx.createGain()
+  g1.gain.setValueAtTime(0.1, now)
+  g1.gain.exponentialRampToValueAtTime(0.001, now + 0.5)
+  g1.connect(masterGain)
+  const osc1 = ctx.createOscillator()
+  osc1.type = 'sine'
+  osc1.frequency.value = 660
+  osc1.connect(g1)
+  osc1.start(now)
+  osc1.stop(now + 0.15)
+
+  const g2 = ctx.createGain()
+  g2.gain.setValueAtTime(0.1, now + 0.12)
+  g2.gain.exponentialRampToValueAtTime(0.001, now + 0.5)
+  g2.connect(masterGain)
+  const osc2 = ctx.createOscillator()
+  osc2.type = 'sine'
+  osc2.frequency.value = 880
+  osc2.connect(g2)
+  osc2.start(now + 0.12)
+  osc2.stop(now + 0.5)
+}
+
+function playWrong() {
+  if (!ctx || !enabled.value) return
+  const now = ctx.currentTime
+  // Descending triangle wave
+  const osc = ctx.createOscillator()
+  const g = ctx.createGain()
+  osc.type = 'triangle'
+  osc.frequency.setValueAtTime(330, now)
+  osc.frequency.exponentialRampToValueAtTime(220, now + 0.25)
+  g.gain.setValueAtTime(0.08, now)
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.3)
+  osc.connect(g)
+  g.connect(masterGain)
+  osc.start(now)
+  osc.stop(now + 0.3)
+}
+
 onMounted(() => {
-  window.__avatrSound = { playClick, playWhoosh, toggle, enabled }
+  window.__avatrSound = { playClick, playWhoosh, playCorrect, playWrong, toggle, enabled }
   // Auto-enable sound on mount
   enable()
 })
@@ -195,7 +239,7 @@ onUnmounted(() => {
   delete window.__avatrSound
 })
 
-defineExpose({ toggle, enabled, playClick, playWhoosh })
+defineExpose({ toggle, enabled, playClick, playWhoosh, playCorrect, playWrong })
 </script>
 
 <style scoped>

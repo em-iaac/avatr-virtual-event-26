@@ -165,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { EVENT, getEventPhase } from '../config.js'
 import CountdownTimer from '../components/CountdownTimer.vue'
@@ -179,11 +179,13 @@ const particles = ref(null)
 let animFrame = null
 let particleList = []
 
-const invitationUnlocked = computed(() => {
-  return !!localStorage.getItem('avatr-quiz-completed')
-})
+const invitationUnlocked = ref(!!localStorage.getItem('avatr-quiz-completed'))
 
-const mobileRooms = computed(() => [
+function refreshLockState() {
+  invitationUnlocked.value = !!localStorage.getItem('avatr-quiz-completed')
+}
+
+const mobileRooms = ref([
   { route: 'waiting-room', label: 'Waiting Room', sub: 'Games & History' },
   { route: 'reveal-room', label: 'Reveal Room', sub: '3D Car Model' },
   { route: 'watching-room', label: 'Premiere', sub: 'Watch the Show' },
@@ -268,10 +270,13 @@ function initParticles() {
 }
 
 onMounted(() => {
+  refreshLockState()
+  document.addEventListener('visibilitychange', refreshLockState)
   initParticles()
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', refreshLockState)
   if (animFrame) cancelAnimationFrame(animFrame)
 })
 </script>
@@ -423,17 +428,40 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked .lobby__segment-fill {
-  fill: rgba(100, 100, 120, 0.04);
+  fill: rgba(200, 169, 110, 0.03);
+  animation: lockedGlow 3s ease-in-out infinite;
 }
 
 .lobby__segment--locked .lobby__segment-stroke {
-  stroke: var(--color-muted);
-  opacity: 0.3;
+  stroke: var(--color-accent);
+  opacity: 0.4;
   stroke-dasharray: 6 4;
+  animation: lockStrokePulse 3s ease-in-out infinite;
 }
 
 .lobby__segment--locked.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(100, 100, 120, 0.08);
+  fill: rgba(200, 169, 110, 0.1);
+}
+
+.lobby__segment--locked .lobby__room-sublabel {
+  opacity: 0.9;
+  fill: var(--color-accent);
+  animation: lockTextPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes lockedGlow {
+  0%, 100% { fill: rgba(200, 169, 110, 0.02); }
+  50% { fill: rgba(200, 169, 110, 0.07); }
+}
+
+@keyframes lockStrokePulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.65; }
+}
+
+@keyframes lockTextPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 .lobby__room-label {
@@ -466,8 +494,15 @@ onUnmounted(() => {
 }
 
 .lobby__lock-icon {
-  color: var(--color-muted);
-  opacity: 0.5;
+  color: var(--color-accent);
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(200, 169, 110, 0.4));
+  animation: lockBounce 2s ease-in-out infinite;
+}
+
+@keyframes lockBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .lobby__center-diamond {

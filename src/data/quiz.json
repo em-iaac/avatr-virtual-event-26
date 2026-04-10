@@ -1,67 +1,89 @@
 {
+  "passingScore": 4,
   "questions": [
     {
-      "question": "What's your ideal weekend drive?",
+      "question": "Which three companies jointly created the AVATR brand?",
+      "hint": { "type": "text", "content": "Think: Manufacturing + Intelligence + Power" },
       "options": [
-        { "text": "A mountain road with sweeping views", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-06": 2 } },
-        { "text": "A coastal highway at sunset", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-06": 2 } },
-        { "text": "Exploring hidden city streets", "scores": { "avatr-11": 1, "avatr-12": 2, "avatr-06": 3 } }
-      ]
+        { "text": "Changan, Huawei, and CATL" },
+        { "text": "BYD, Xiaomi, and Tesla" },
+        { "text": "Geely, Baidu, and Samsung SDI" },
+        { "text": "NIO, Qualcomm, and Panasonic" }
+      ],
+      "correctIndex": 0,
+      "explanation": "AVATR combines Changan's manufacturing, Huawei's intelligence, and CATL's battery technology."
     },
     {
-      "question": "What matters most in a vehicle?",
+      "question": "What is the CLTC range of the AVATR 012?",
+      "hint": { "type": "stat", "value": "???", "unit": "km", "label": "CLTC Range" },
       "options": [
-        { "text": "Commanding presence and space", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-06": 1 } },
-        { "text": "Elegant design and refinement", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-06": 1 } },
-        { "text": "Agility and smart tech", "scores": { "avatr-11": 1, "avatr-12": 1, "avatr-06": 3 } }
-      ]
+        { "text": "550 km" },
+        { "text": "620 km" },
+        { "text": "700 km" },
+        { "text": "800 km" }
+      ],
+      "correctIndex": 2,
+      "explanation": "The AVATR 012 Executive Sedan achieves a class-leading 700 km CLTC range."
     },
     {
-      "question": "Pick a word that describes you",
+      "question": "What autonomous driving system powers AVATR vehicles?",
+      "hint": { "type": "text", "content": "Powered by one of the three founding partners" },
       "options": [
-        { "text": "Adventurous", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-06": 2 } },
-        { "text": "Sophisticated", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-06": 1 } },
-        { "text": "Dynamic", "scores": { "avatr-11": 2, "avatr-12": 1, "avatr-06": 3 } }
-      ]
+        { "text": "Tesla Autopilot" },
+        { "text": "Huawei ADS 2.0" },
+        { "text": "Mobileye SuperVision" },
+        { "text": "Baidu Apollo" }
+      ],
+      "correctIndex": 1,
+      "explanation": "Huawei's ADS 2.0 uses 26 sensors and 400 TFLOPS of computing power."
     },
     {
-      "question": "Your dream destination?",
+      "question": "How many sensors does the AVATR intelligent driving system integrate?",
+      "hint": { "type": "text", "content": "Part of the Huawei ADS 2.0 suite" },
       "options": [
-        { "text": "Swiss Alps — wide open grandeur", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-06": 1 } },
-        { "text": "Monaco — luxury and precision", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-06": 2 } },
-        { "text": "Tokyo — energy and innovation", "scores": { "avatr-11": 1, "avatr-12": 2, "avatr-06": 3 } }
-      ]
+        { "text": "12 sensors" },
+        { "text": "18 sensors" },
+        { "text": "26 sensors" },
+        { "text": "34 sensors" }
+      ],
+      "correctIndex": 2,
+      "explanation": "The ADS 2.0 system integrates 26 sensors for comprehensive environmental perception."
     },
     {
-      "question": "How do you start your morning?",
+      "question": "Which AVATR model is classified as a Compact SUV?",
+      "hint": { "type": "vehicle", "image": "avatr-06.png" },
       "options": [
-        { "text": "An early hike before the world wakes", "scores": { "avatr-11": 3, "avatr-12": 1, "avatr-06": 2 } },
-        { "text": "Espresso with a curated playlist", "scores": { "avatr-11": 1, "avatr-12": 3, "avatr-06": 1 } },
-        { "text": "Quick workout then straight to action", "scores": { "avatr-11": 1, "avatr-12": 1, "avatr-06": 3 } }
-      ]
+        { "text": "AVATR 011" },
+        { "text": "AVATR 012" },
+        { "text": "AVATR 06" },
+        { "text": "AVATR 09" }
+      ],
+      "correctIndex": 2,
+      "explanation": "The AVATR 06 is the Compact SUV — born for the urban frontier."
+    },
+    {
+      "question": "What is the 0-100 km/h acceleration time of the AVATR 012?",
+      "hint": { "type": "stat", "value": "???", "unit": "s", "label": "0-100 km/h" },
+      "options": [
+        { "text": "2.9 seconds" },
+        { "text": "3.9 seconds" },
+        { "text": "4.5 seconds" },
+        { "text": "5.2 seconds" }
+      ],
+      "correctIndex": 1,
+      "explanation": "The AVATR 012 achieves 0-100 km/h in just 3.9 seconds."
+    },
+    {
+      "question": "How long is Changan Automobile's heritage?",
+      "hint": { "type": "text", "content": "One of the oldest automotive groups in China" },
+      "options": [
+        { "text": "50+ years" },
+        { "text": "80+ years" },
+        { "text": "120+ years" },
+        { "text": "160+ years" }
+      ],
+      "correctIndex": 3,
+      "explanation": "Changan Automobile has over 160 years of heritage and operates 14 global manufacturing plants."
     }
-  ],
-  "results": {
-    "avatr-11": {
-      "name": "AVATR 011",
-      "type": "Luxury SUV",
-      "tagline": "Where Intelligence Meets Elegance",
-      "description": "You're drawn to presence, space, and the freedom of the open road. The AVATR 11 matches your adventurous spirit with commanding luxury.",
-      "image": "avatr-011.png"
-    },
-    "avatr-12": {
-      "name": "AVATR 012",
-      "type": "Executive Sedan",
-      "tagline": "Redefining the Art of Motion",
-      "description": "Refined taste, an eye for design, and appreciation for the finer things. The AVATR 12 is your perfect expression of sophisticated motion.",
-      "image": "avatr-012.png"
-    },
-    "avatr-06": {
-      "name": "AVATR 06",
-      "type": "Compact SUV",
-      "tagline": "Born for the Urban Frontier",
-      "description": "Dynamic, tech-forward, and always in motion. The AVATR 06 keeps up with your urban energy and smart lifestyle.",
-      "image": "avatr-06.png"
-    }
-  }
+  ]
 }

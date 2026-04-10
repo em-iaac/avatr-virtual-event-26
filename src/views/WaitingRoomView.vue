@@ -22,6 +22,12 @@
           <PerformanceStats v-else-if="activeTab === 'stats'" />
           <SpeedChallenge v-else-if="activeTab === 'speed'" />
           <div v-else-if="activeTab === 'quiz'" class="waiting-room__quiz-wrap">
+            <Transition name="tab-fade">
+              <div v-if="showLockedMsg" class="waiting-room__locked-msg glass-panel">
+                <span class="waiting-room__locked-msg-icon">&#x1f512;</span>
+                Complete the knowledge quiz to unlock the Invitation Room
+              </div>
+            </Transition>
             <QuizModule @quiz-complete="onQuizComplete" />
             <!-- Invitation unlocked banner -->
             <Transition name="tab-fade">
@@ -60,11 +66,12 @@ const tabs = [
   { id: 'vehicles', label: 'Vehicles' },
   { id: 'stats', label: 'Performance' },
   { id: 'speed', label: 'Speed Challenge' },
-  { id: 'quiz', label: 'Quiz' },
+  { id: 'quiz', label: 'Knowledge Quiz' },
 ]
 
 const activeTab = ref('story')
 const justUnlocked = ref(false)
+const showLockedMsg = ref(false)
 
 onMounted(() => {
   // Check query params for tab pre-selection
@@ -76,6 +83,8 @@ onMounted(() => {
   // Show locked message if redirected from invitation
   if (route.query.locked === '1') {
     activeTab.value = 'quiz'
+    showLockedMsg.value = true
+    setTimeout(() => { showLockedMsg.value = false }, 5000)
   }
 })
 
@@ -215,6 +224,25 @@ function goToInvitation() {
 
 .waiting-room__unlocked-btn:hover {
   background: var(--color-accent-hover);
+}
+
+/* Locked message */
+.waiting-room__locked-msg {
+  text-align: center;
+  padding: 16px 24px;
+  margin: 0 auto 24px;
+  max-width: 500px;
+  font-size: 0.88rem;
+  color: var(--color-accent);
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.waiting-room__locked-msg-icon {
+  font-size: 1.1rem;
 }
 
 /* Tab transition */
