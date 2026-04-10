@@ -21,23 +21,21 @@
 
     <!-- Emblem Floorplan -->
     <div class="lobby__floorplan">
+      <!-- Base emblem PNG -->
+      <img :src="emblemWhite" alt="" class="lobby__emblem-img" draggable="false" />
+
+      <!-- Interactive overlay SVG (transparent fills only, PNG provides visuals) -->
       <svg
         class="lobby__emblem-svg"
-        viewBox="0 0 400 560"
+        viewBox="0 0 668 675"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
           </filter>
         </defs>
-
-        <!-- Outer rectangle (structural frame) -->
-        <rect
-          x="60" y="40" width="280" height="480" rx="4"
-          stroke="rgba(200,169,110,0.15)" stroke-width="1.5" fill="none"
-        />
 
         <!-- Top triangle segment → Reveal Room -->
         <g
@@ -48,16 +46,11 @@
           @click="enterRoom('reveal-room')"
         >
           <path
-            d="M 60 40 L 200 318 L 340 40 Z"
+            d="M 186 48 L 334 320 L 482 48 Z"
             class="lobby__segment-fill"
           />
-          <path
-            d="M 60 40 L 200 318 L 340 40"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
-          <text x="200" y="135" text-anchor="middle" class="lobby__room-label">Reveal</text>
-          <text x="200" y="155" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
+          <text x="334" y="155" text-anchor="middle" class="lobby__room-label">Reveal</text>
+          <text x="334" y="178" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
         </g>
 
         <!-- Left segment → Waiting Room -->
@@ -69,16 +62,11 @@
           @click="enterRoom('waiting-room')"
         >
           <path
-            d="M 60 40 L 200 318 L 60 520 Z"
+            d="M 186 48 L 334 320 L 186 492 Z"
             class="lobby__segment-fill"
           />
-          <path
-            d="M 60 40 L 200 318 L 60 520"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
-          <text x="110" y="285" text-anchor="middle" class="lobby__room-label">Waiting</text>
-          <text x="110" y="305" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
+          <text x="232" y="290" text-anchor="middle" class="lobby__room-label">Waiting</text>
+          <text x="232" y="313" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
         </g>
 
         <!-- Right segment → Watching Room -->
@@ -90,19 +78,14 @@
           @click="enterRoom('watching-room')"
         >
           <path
-            d="M 340 40 L 200 318 L 340 520 Z"
+            d="M 482 48 L 334 320 L 482 492 Z"
             class="lobby__segment-fill"
           />
-          <path
-            d="M 340 40 L 200 318 L 340 520"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
-          <text x="290" y="285" text-anchor="middle" class="lobby__room-label">Premiere</text>
-          <text x="290" y="305" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
+          <text x="436" y="290" text-anchor="middle" class="lobby__room-label">Premiere</text>
+          <text x="436" y="313" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
         </g>
 
-        <!-- Bottom triangle / diamond → Invitation Room (locked) -->
+        <!-- Bottom triangle → Invitation Room (locked) -->
         <g
           class="lobby__segment"
           :class="{
@@ -113,62 +96,50 @@
           @mouseleave="hoveredRoom = null"
           @click="enterInvitation"
         >
-          <!-- Invisible hit area (always captures pointer events regardless of filter) -->
+          <!-- Invisible hit area -->
           <path
-            d="M 60 520 L 200 318 L 340 520 Z"
+            d="M 186 492 L 334 320 L 482 492 Z"
             fill="transparent"
             pointer-events="all"
             style="cursor: inherit"
           />
-          <!-- Frosted shapes (blurred when locked) -->
-          <g v-if="!invitationUnlocked" filter="url(#frostedLock)" pointer-events="none">
-            <path
-              d="M 60 520 L 200 318 L 340 520 Z"
-              class="lobby__segment-fill"
-            />
-            <path
-              d="M 60 520 L 200 318 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-              class="lobby__segment-stroke"
-            />
-          </g>
-          <!-- Normal shapes (when unlocked) -->
-          <g v-else>
-            <path
-              d="M 60 520 L 200 318 L 340 520 Z"
-              class="lobby__segment-fill"
-            />
-            <path
-              d="M 60 520 L 200 318 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-              class="lobby__segment-stroke"
-            />
-          </g>
-          <!-- Semi-transparent frost overlay (not blurred) -->
+          <!-- Frosted fill (blurred when locked) -->
           <path
             v-if="!invitationUnlocked"
-            d="M 60 520 L 200 318 L 340 520 Z"
-            fill="rgba(6,6,8,0.7)"
+            d="M 186 492 L 334 320 L 482 492 Z"
+            class="lobby__segment-fill"
+            filter="url(#frostedLock)"
+            pointer-events="none"
+          />
+          <!-- Normal fill (when unlocked) -->
+          <path
+            v-else
+            d="M 186 492 L 334 320 L 482 492 Z"
+            class="lobby__segment-fill"
+          />
+          <!-- Semi-transparent frost overlay -->
+          <path
+            v-if="!invitationUnlocked"
+            d="M 186 492 L 334 320 L 482 492 Z"
+            fill="rgba(6,6,8,0.65)"
             pointer-events="none"
           />
 
-          <!-- Labels (outside blur so they remain crisp) -->
-          <text x="200" y="440" text-anchor="middle" class="lobby__room-label" pointer-events="none">
+          <!-- Labels -->
+          <text x="334" y="430" text-anchor="middle" class="lobby__room-label" pointer-events="none">
             {{ invitationUnlocked ? 'Invitation' : 'Locked' }}
           </text>
-          <text x="200" y="458" text-anchor="middle" class="lobby__room-sublabel" pointer-events="none">
+          <text x="334" y="453" text-anchor="middle" class="lobby__room-sublabel" pointer-events="none">
             {{ invitationUnlocked ? 'RSVP & Exclusive' : 'Complete the Quiz' }}
           </text>
         </g>
 
-        <!-- Large centered lock icon (rendered outside filtered group so it stays sharp) -->
+        <!-- Lock icon -->
         <g v-if="!invitationUnlocked" class="lobby__lock-icon" @click="enterInvitation">
-          <rect x="184" y="385" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" />
-          <path d="M190 385 V377 A10 10 0 0 1 210 377 V385" stroke="currentColor" stroke-width="1.5" fill="none" />
-          <circle cx="200" cy="398" r="2.5" fill="currentColor" />
+          <rect x="318" y="378" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <path d="M324 378 V370 A10 10 0 0 1 344 370 V378" stroke="currentColor" stroke-width="1.5" fill="none" />
+          <circle cx="334" cy="391" r="2.5" fill="currentColor" />
         </g>
-
-
       </svg>
     </div>
 
@@ -227,6 +198,7 @@ import CountdownTimer from '../components/CountdownTimer.vue'
 import MagneticButton from '../components/MagneticButton.vue'
 
 import textLogoWhite from '../assets/avatr-text-logo-white.png'
+import emblemWhite from '../assets/avatr-logo-emblem-white.png'
 
 const router = useRouter()
 const phase = ref(getEventPhase())
@@ -469,9 +441,25 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.lobby__emblem-svg {
+.lobby__emblem-img {
+  display: block;
   width: 100%;
   height: auto;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+
+.lobby__floorplan:hover .lobby__emblem-img {
+  opacity: 0.75;
+}
+
+.lobby__emblem-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* Segments */
@@ -481,22 +469,12 @@ onUnmounted(() => {
 }
 
 .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.02);
+  fill: rgba(200, 169, 110, 0.0);
   transition: fill 0.4s ease;
 }
 
-.lobby__segment-stroke {
-  opacity: 0.4;
-  transition: opacity 0.3s ease, stroke-width 0.3s ease;
-}
-
 .lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.08);
-}
-
-.lobby__segment--active .lobby__segment-stroke {
-  opacity: 1;
-  stroke-width: 2;
+  fill: rgba(200, 169, 110, 0.1);
 }
 
 .lobby__segment--locked {
@@ -504,12 +482,7 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.05);
-}
-
-.lobby__segment--locked .lobby__segment-stroke {
-  stroke: var(--color-accent);
-  opacity: 0.15;
+  fill: rgba(200, 169, 110, 0.03);
 }
 
 .lobby__segment--locked .lobby__room-label {
@@ -517,18 +490,18 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.08);
+  fill: rgba(200, 169, 110, 0.06);
 }
 
 .lobby__segment--locked .lobby__room-sublabel {
   opacity: 0.9;
   fill: var(--color-accent);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .lobby__room-label {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 500;
   fill: var(--color-text);
   letter-spacing: 0.06em;
@@ -543,7 +516,7 @@ onUnmounted(() => {
 
 .lobby__room-sublabel {
   font-family: var(--font-body);
-  font-size: 9px;
+  font-size: 11px;
   fill: var(--color-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -739,15 +712,15 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .lobby__floorplan {
-    width: clamp(180px, 55vw, 240px);
+    width: clamp(200px, 60vw, 280px);
   }
 
   .lobby__room-label {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .lobby__room-sublabel {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .lobby__mobile-rooms {
