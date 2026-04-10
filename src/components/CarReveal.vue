@@ -24,9 +24,74 @@
         <p class="car-reveal__loading-text">Loading the actual AVATR model.</p>
       </div>
 
-      <div class="car-reveal__hint glass-panel glass-panel--deep">
-        <span>Drag to rotate</span>
-        <span>Move to sweep light</span>
+      <!-- Left-side unified control panel -->
+      <div class="car-reveal__controls">
+        <div class="car-reveal__controls-label">Controls</div>
+
+        <!-- Hints -->
+        <div class="car-reveal__hint-row">
+          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 12h8M12 8v8" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          <span>Drag to rotate</span>
+        </div>
+        <div class="car-reveal__hint-row">
+          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round"/>
+          </svg>
+          <span>Move to sweep light</span>
+        </div>
+
+        <div class="car-reveal__controls-divider"></div>
+
+        <!-- Lights toggle -->
+        <button
+          class="car-reveal__ctrl-btn glass-panel glass-panel--deep"
+          :class="{ 'car-reveal__ctrl-btn--active': lightsOn }"
+          @click="toggleLights"
+        >
+          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path v-if="!lightsOn" d="M12 3v1M18.36 5.64l-.71.71M21 12h-1M18.36 18.36l-.71-.71M12 20v1M5.64 18.36l.71-.71M3 12h1M5.64 5.64l.71.71" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="5"/>
+          </svg>
+          <span>{{ lightsOn ? 'Dim Lights' : 'Lights On' }}</span>
+        </button>
+
+        <!-- Specs toggle -->
+        <button
+          class="car-reveal__ctrl-btn glass-panel glass-panel--deep"
+          :class="{ 'car-reveal__ctrl-btn--active': showSpecs }"
+          @click="showSpecs = !showSpecs"
+        >
+          <svg class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          <span>{{ showSpecs ? 'Hide Specs' : 'Show Specs' }}</span>
+        </button>
+
+        <!-- Sound toggle -->
+        <button
+          class="car-reveal__ctrl-btn glass-panel glass-panel--deep"
+          :class="{ 'car-reveal__ctrl-btn--active': soundOn }"
+          @click="toggleSound"
+        >
+          <svg v-if="soundOn" class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+          </svg>
+          <svg v-else class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
+            <line x1="22" y1="9" x2="16" y2="15"/>
+            <line x1="16" y1="9" x2="22" y2="15"/>
+          </svg>
+          <span>{{ soundOn ? 'Sound On' : 'Sound Off' }}</span>
+        </button>
       </div>
 
       <div class="car-reveal__text" ref="textBlock">
@@ -34,22 +99,8 @@
         <p class="car-reveal__subtitle">The real model. Only visible where the light passes.</p>
       </div>
 
-      <!-- Lights toggle button -->
-      <button
-        class="car-reveal__lights-btn glass-panel glass-panel--deep"
-        :class="{ 'car-reveal__lights-btn--on': lightsOn }"
-        @click="toggleLights"
-      >
-        {{ lightsOn ? 'Dim Lights' : 'Turn On Lights' }}
-      </button>
-
+      <!-- Specs grid (bottom center) -->
       <div class="car-reveal__specs" ref="specsEl">
-        <button
-          class="car-reveal__specs-toggle glass-panel glass-panel--deep"
-          @click="showSpecs = !showSpecs"
-        >
-          {{ showSpecs ? 'Hide Specs' : 'Show Specs' }}
-        </button>
         <Transition name="specs-fade">
           <div v-if="showSpecs" class="car-reveal__specs-grid">
             <div v-for="spec in specChips" :key="spec.label" class="car-reveal__spec glass-panel glass-panel--deep">
@@ -78,6 +129,7 @@ const specsEl = ref(null)
 const loading = ref(true)
 const lightsOn = ref(false)
 const showSpecs = ref(false)
+const soundOn = ref(true)
 const revealRadius = ref(280)
 const pointer = reactive({ x: 240, y: 240 })
 
@@ -158,6 +210,11 @@ function toggleLights() {
   }
 
   window.__avatrSound?.playClick()
+}
+
+function toggleSound() {
+  window.__avatrSound?.toggle()
+  soundOn.value = window.__avatrSound?.enabled?.value ?? !soundOn.value
 }
 
 function buildScene() {
@@ -371,14 +428,14 @@ onUnmounted(() => {
 .car-reveal__loading {
   position: absolute;
   top: 24px;
-  left: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 5;
   padding: 14px 16px;
   max-width: 240px;
 }
 
 .car-reveal__loading-label,
-.car-reveal__hint span,
 .car-reveal__subtitle,
 .car-reveal__spec-label {
   text-transform: uppercase;
@@ -397,21 +454,87 @@ onUnmounted(() => {
   font-size: 0.86rem;
 }
 
-.car-reveal__hint {
+/* ── Left-side unified control panel ── */
+.car-reveal__controls {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 5;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 14px 16px;
+  padding: 16px 14px;
+  background: rgba(10, 10, 14, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(200, 169, 110, 0.12);
+  border-radius: 16px;
+  width: 180px;
 }
 
-.car-reveal__hint span {
-  font-size: 0.62rem;
-  letter-spacing: 0.15em;
+.car-reveal__controls-label {
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+
+.car-reveal__controls-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(200, 169, 110, 0.12);
+  margin: 6px 0;
+}
+
+.car-reveal__hint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 2px;
+}
+
+.car-reveal__hint-row span {
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--color-muted);
+}
+
+.car-reveal__ctrl-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.car-reveal__ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.car-reveal__ctrl-btn:hover {
+  border-color: rgba(200, 169, 110, 0.4);
+  color: var(--color-accent);
+}
+
+.car-reveal__ctrl-btn--active {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 14px rgba(200,169,110,0.12);
 }
 
 .car-reveal__text {
@@ -460,16 +583,6 @@ onUnmounted(() => {
   padding: 0 20px;
 }
 
-.car-reveal__specs-toggle {
-  padding: 10px 24px;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
 .car-reveal__specs-grid {
   display: flex;
   gap: 12px;
@@ -499,29 +612,6 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-/* Lights toggle button */
-.car-reveal__lights-btn {
-  position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  padding: 12px 24px;
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-text);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.car-reveal__lights-btn--on {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  box-shadow: 0 0 20px rgba(200,169,110,0.15);
-}
-
 /* Specs fade transition */
 .specs-fade-enter-active {
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -538,12 +628,16 @@ onUnmounted(() => {
 }
 
 @media (max-width: 900px) {
-  .car-reveal__hint {
-    display: none;
+  .car-reveal__controls {
+    top: auto;
+    bottom: 80px;
+    left: 12px;
+    transform: none;
+    width: 160px;
   }
 
   .car-reveal__loading {
-    left: 12px;
+    left: 50%;
     top: 12px;
   }
 }

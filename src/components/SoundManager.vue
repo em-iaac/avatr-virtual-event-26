@@ -1,6 +1,12 @@
 <template>
-  <!-- Sound toggle button (bottom-right) -->
-  <div class="sound-toggle" :class="{ 'sound-toggle--muted': !enabled }" @click="toggle" title="Toggle ambient sound">
+  <!-- Sound toggle button — hidden in reveal-room (handled by CarReveal controls) -->
+  <div
+    v-show="route.name !== 'reveal-room'"
+    class="sound-toggle"
+    :class="{ 'sound-toggle--muted': !enabled }"
+    @click="toggle"
+    title="Toggle ambient sound"
+  >
     <svg v-if="enabled" class="sound-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z" />
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
@@ -177,7 +183,7 @@ function playWhoosh() {
 }
 
 onMounted(() => {
-  window.__avatrSound = { playClick, playWhoosh }
+  window.__avatrSound = { playClick, playWhoosh, toggle, enabled }
   // Auto-enable sound on mount
   enable()
 })
