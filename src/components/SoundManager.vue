@@ -1,24 +1,6 @@
 <template>
-  <!-- Sound toggle button — hidden in reveal-room (handled by CarReveal controls) -->
-  <div
-    v-show="route.name !== 'reveal-room'"
-    class="sound-toggle"
-    :class="{ 'sound-toggle--muted': !enabled }"
-    @click="toggle"
-    title="Toggle ambient sound"
-  >
-    <svg v-if="enabled" class="sound-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-    </svg>
-    <svg v-else class="sound-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z" />
-      <line x1="22" y1="9" x2="16" y2="15" />
-      <line x1="16" y1="9" x2="22" y2="15" />
-    </svg>
-    <span class="sound-toggle__label">{{ enabled ? 'SOUND ON' : 'SOUND OFF' }}</span>
-  </div>
+  <!-- Sound is always on — no visible toggle -->
+  <div style="display:none"></div>
 </template>
 
 <script setup>
@@ -243,48 +225,4 @@ defineExpose({ toggle, enabled, playClick, playWhoosh, playCorrect, playWrong })
 </script>
 
 <style scoped>
-.sound-toggle {
-  position: fixed;
-  bottom: 120px;
-  left: 20px;
-  z-index: 9000;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px 8px 10px;
-  background: rgba(10, 10, 14, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(200, 169, 110, 0.2);
-  border-radius: 100px;
-  cursor: pointer;
-  transition: border-color 0.3s, background 0.3s, transform 0.2s;
-  color: rgba(200, 169, 110, 0.7);
-  user-select: none;
-}
-
-.sound-toggle:hover {
-  border-color: rgba(200, 169, 110, 0.5);
-  background: rgba(10, 10, 14, 0.9);
-  transform: translateY(-2px);
-  color: var(--color-accent);
-}
-
-.sound-toggle--muted {
-  color: var(--color-muted);
-  border-color: rgba(255,255,255,0.06);
-}
-
-.sound-toggle__icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.sound-toggle__label {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  font-weight: 600;
-}
 </style>

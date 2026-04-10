@@ -88,26 +88,6 @@
           <span>{{ showSpecs ? 'Hide Specs' : 'Show Specs' }}</span>
         </button>
 
-        <!-- Sound toggle -->
-        <button
-          class="car-reveal__ctrl-btn glass-panel glass-panel--deep"
-          :class="{ 'car-reveal__ctrl-btn--active': soundOn }"
-          @click="toggleSound"
-        >
-          <!-- ON: filled speaker with waves -->
-          <svg v-if="soundOn" class="car-reveal__ctrl-icon car-reveal__ctrl-icon--glow" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5">
-            <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" fill="none"/>
-          </svg>
-          <!-- OFF: stroke-only speaker with X -->
-          <svg v-else class="car-reveal__ctrl-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M11 5 L6 9 H2 V15 H6 L11 19 V5Z"/>
-            <line x1="22" y1="9" x2="16" y2="15"/>
-            <line x1="16" y1="9" x2="22" y2="15"/>
-          </svg>
-          <span>{{ soundOn ? 'Sound On' : 'Sound Off' }}</span>
-        </button>
       </div>
 
       <div class="car-reveal__text" ref="textBlock">
@@ -145,7 +125,6 @@ const specsEl = ref(null)
 const loading = ref(true)
 const lightsOn = ref(false)
 const showSpecs = ref(false)
-const soundOn = ref(true)
 const revealRadius = ref(280)
 const pointer = reactive({ x: 240, y: 240 })
 
@@ -228,10 +207,6 @@ function toggleLights() {
   window.__avatrSound?.playClick()
 }
 
-function toggleSound() {
-  window.__avatrSound?.toggle()
-  soundOn.value = window.__avatrSound?.enabled?.value ?? !soundOn.value
-}
 
 function buildScene() {
   const width = canvas.value.clientWidth || window.innerWidth
