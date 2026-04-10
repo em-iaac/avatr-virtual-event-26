@@ -1,4 +1,5 @@
 <template>
+  <!-- Full host overlay -->
   <Transition name="host-fade">
     <div v-if="visible" class="host-overlay" @click.self="dismiss">
       <div class="host-card glass-panel glass-panel--deep">
@@ -22,12 +23,9 @@
           <span class="host-card__role">Your Host</span>
         </div>
 
-        <!-- Message -->
-        <p class="host-card__message">{{ message }}</p>
-
-        <!-- Tips -->
-        <div class="host-card__chips">
-          <span v-for="tip in tips" :key="tip" class="host-card__chip">{{ tip }}</span>
+        <!-- Message lines -->
+        <div class="host-card__message">
+          <p v-for="(line, i) in messageLines" :key="i" :class="{ 'host-card__line--ar': isArabic(line) }">{{ line }}</p>
         </div>
 
         <!-- Dismiss button -->
@@ -35,23 +33,52 @@
       </div>
     </div>
   </Transition>
+
+  <!-- Mini host button (visible after first dismiss, lobby only) -->
+  <Transition name="mini-pop">
+    <button
+      v-if="showMini"
+      class="host-mini"
+      title="Talk to Ava"
+      @click="reopen"
+    >
+      <div class="host-mini__halo"></div>
+      <img :src="hostFigure" alt="Ava" class="host-mini__image" />
+    </button>
+  </Transition>
 </template>
 
 <script setup>
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import hostFigure from '../assets/host-figure-logo.png'
 import hostSpeechUrl from '../assets/host-speech.mp3'
 
 const route = useRoute()
 const visible = ref(false)
-const dismissed = ref(false)
+const hasBeenShown = ref(false)
 let audio = null
 
-const message = 'Welcome to the AVATR virtual experience. Explore interactive rooms — discover the brand story, reveal the car in 3D, watch the premiere, and unlock an exclusive invitation by completing the quiz.'
-const tips = ['Explore each room', 'Complete the quiz to unlock the invitation']
+const messageLines = [
+  "مرحبا! I'm Ava — your guide to the Avatr Virtual Experience. \u{1F44B}",
+  "Welcome to a world where emotional intelligence meets motion, and every detail is designed to delight.",
+  "أهلاً وسهلاً — tonight, you're not just watching. You're exploring. Ahead of you are rooms to discover, games to play, surprises hidden along the way, and a reveal that Kuwait has been waiting for.",
+  "Take your time. Tap, scroll, compete on the leaderboard — and share the journey with friends. أحلى التجارب ما تنعاش لحالك.",
+  "The countdown is ticking. The premiere is coming.",
+  "هل بتكون من الحضور؟",
+  "Intelligent Luxury. Motion in Delight.",
+  "يلا، نبدأ. \u{2726}",
+]
+
+function isArabic(text) {
+  return /[\u0600-\u06FF]/.test(text.charAt(0))
+}
+
+// Show the mini button when overlay is closed and we're in the lobby
+const showMini = computed(() => !visible.value && hasBeenShown.value && route?.name === 'lobby')
 
 function playNarration() {
+  stopNarration()
   audio = new Audio(hostSpeechUrl)
   audio.volume = 0.8
   audio.play().catch(() => {})
@@ -67,18 +94,27 @@ function stopNarration() {
 
 function dismiss() {
   visible.value = false
-  dismissed.value = true
+  hasBeenShown.value = true
   stopNarration()
 }
 
-// Show only in the lobby, once per session
+function reopen() {
+  visible.value = true
+  playNarration()
+}
+
+// Auto-show in the lobby once per session
 watch(() => route?.name, (roomName) => {
-  if (roomName === 'lobby' && !dismissed.value && !sessionStorage.getItem('avatr-host-shown')) {
+  if (roomName === 'lobby' && !hasBeenShown.value && !sessionStorage.getItem('avatr-host-shown')) {
     sessionStorage.setItem('avatr-host-shown', '1')
     setTimeout(() => {
       visible.value = true
+      hasBeenShown.value = true
       playNarration()
     }, 1000)
+  } else if (roomName === 'lobby' && !hasBeenShown.value) {
+    // Returning to lobby after session storage was set (e.g. page reload)
+    hasBeenShown.value = true
   } else if (roomName !== 'lobby') {
     visible.value = false
     stopNarration()
@@ -91,6 +127,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* ── Full overlay ── */
 .host-overlay {
   position: fixed;
   inset: 0;
@@ -102,6 +139,7 @@ onUnmounted(() => {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 20px;
+  overflow-y: auto;
 }
 
 .host-card {
@@ -112,8 +150,9 @@ onUnmounted(() => {
   gap: 20px;
   padding: 48px 40px 36px;
   text-align: center;
-  max-width: 440px;
+  max-width: 480px;
   width: 100%;
+  margin: auto;
 }
 
 .host-card__close {
@@ -185,30 +224,23 @@ onUnmounted(() => {
 
 /* Message */
 .host-card__message {
-  color: var(--color-text);
-  font-size: 0.92rem;
-  line-height: 1.6;
-  max-width: 360px;
-  opacity: 0.9;
-}
-
-/* Chips */
-.host-card__chips {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
 }
 
-.host-card__chip {
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(200,169,110,0.14);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+.host-card__message p {
+  color: var(--color-text);
+  font-size: 0.88rem;
+  line-height: 1.65;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.host-card__line--ar {
+  direction: rtl;
+  font-size: 0.92rem;
 }
 
 /* Dismiss CTA */
@@ -232,7 +264,56 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-/* Overlay transition */
+/* ── Mini host button ── */
+.host-mini {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 120;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(200,169,110,0.25);
+  background: rgba(10, 10, 14, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.host-mini:hover {
+  border-color: rgba(200,169,110,0.6);
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(200,169,110,0.15);
+}
+
+.host-mini__halo {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,169,110,0.1), transparent 70%);
+  animation: miniHalo 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes miniHalo {
+  0%, 100% { transform: scale(0.9); opacity: 0.4; }
+  50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.host-mini__image {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 8px rgba(200,169,110,0.15));
+}
+
+/* ── Overlay transition ── */
 .host-fade-enter-active {
   transition: opacity 0.5s ease;
 }
@@ -253,6 +334,22 @@ onUnmounted(() => {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ── Mini button transition ── */
+.mini-pop-enter-active {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.mini-pop-leave-active {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.mini-pop-enter-from {
+  transform: scale(0.5);
+  opacity: 0;
+}
+.mini-pop-leave-to {
+  transform: scale(0.8);
+  opacity: 0;
+}
+
 @media (max-width: 600px) {
   .host-card {
     padding: 36px 24px 28px;
@@ -263,8 +360,20 @@ onUnmounted(() => {
     height: 90px;
   }
 
-  .host-card__message {
-    font-size: 0.85rem;
+  .host-card__message p {
+    font-size: 0.82rem;
+  }
+
+  .host-mini {
+    bottom: 16px;
+    left: 16px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .host-mini__image {
+    width: 30px;
+    height: 30px;
   }
 }
 </style>
