@@ -113,8 +113,27 @@
           @mouseleave="hoveredRoom = null"
           @click="enterInvitation"
         >
+          <!-- Invisible hit area (always captures pointer events regardless of filter) -->
+          <path
+            d="M 60 520 L 200 320 L 340 520 Z"
+            fill="transparent"
+            pointer-events="all"
+            style="cursor: inherit"
+          />
           <!-- Frosted shapes (blurred when locked) -->
-          <g :filter="!invitationUnlocked ? 'url(#frostedLock)' : undefined">
+          <g v-if="!invitationUnlocked" filter="url(#frostedLock)" pointer-events="none">
+            <path
+              d="M 60 520 L 200 320 L 340 520 Z"
+              class="lobby__segment-fill"
+            />
+            <path
+              d="M 60 520 L 200 320 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+              class="lobby__segment-stroke"
+            />
+          </g>
+          <!-- Normal shapes (when unlocked) -->
+          <g v-else>
             <path
               d="M 60 520 L 200 320 L 340 520 Z"
               class="lobby__segment-fill"
@@ -130,13 +149,14 @@
             v-if="!invitationUnlocked"
             d="M 60 520 L 200 320 L 340 520 Z"
             fill="rgba(6,6,8,0.7)"
+            pointer-events="none"
           />
 
           <!-- Labels (outside blur so they remain crisp) -->
-          <text x="200" y="440" text-anchor="middle" class="lobby__room-label">
+          <text x="200" y="440" text-anchor="middle" class="lobby__room-label" pointer-events="none">
             {{ invitationUnlocked ? 'Invitation' : 'Locked' }}
           </text>
-          <text x="200" y="458" text-anchor="middle" class="lobby__room-sublabel">
+          <text x="200" y="458" text-anchor="middle" class="lobby__room-sublabel" pointer-events="none">
             {{ invitationUnlocked ? 'RSVP & Exclusive' : 'Complete the Quiz' }}
           </text>
         </g>
@@ -248,6 +268,8 @@ function enterRoom(routeName) {
 }
 
 function enterInvitation() {
+  // Re-check localStorage at click time to ensure fresh state
+  refreshLockState()
   if (!invitationUnlocked.value) {
     window.__avatrSound?.playClick()
     showLockModal.value = true
