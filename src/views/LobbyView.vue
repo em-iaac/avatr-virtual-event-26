@@ -29,7 +29,7 @@
       >
         <defs>
           <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
           </filter>
         </defs>
 
@@ -109,27 +109,30 @@
             'lobby__segment--active': hoveredRoom === 'invitation',
             'lobby__segment--locked': !invitationUnlocked
           }"
-          :filter="!invitationUnlocked ? 'url(#frostedLock)' : undefined"
           @mouseenter="hoveredRoom = 'invitation'"
           @mouseleave="hoveredRoom = null"
           @click="enterInvitation"
         >
-          <path
-            d="M 60 520 L 200 320 L 340 520 Z"
-            class="lobby__segment-fill"
-          />
-          <!-- Semi-transparent frost overlay -->
+          <!-- Frosted shapes (blurred when locked) -->
+          <g :filter="!invitationUnlocked ? 'url(#frostedLock)' : undefined">
+            <path
+              d="M 60 520 L 200 320 L 340 520 Z"
+              class="lobby__segment-fill"
+            />
+            <path
+              d="M 60 520 L 200 320 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+              class="lobby__segment-stroke"
+            />
+          </g>
+          <!-- Semi-transparent frost overlay (not blurred) -->
           <path
             v-if="!invitationUnlocked"
             d="M 60 520 L 200 320 L 340 520 Z"
-            fill="rgba(6,6,8,0.55)"
-          />
-          <path
-            d="M 60 520 L 200 320 L 340 520"
-            stroke="var(--color-accent)" stroke-width="1.2" fill="none"
-            class="lobby__segment-stroke"
+            fill="rgba(6,6,8,0.7)"
           />
 
+          <!-- Labels (outside blur so they remain crisp) -->
           <text x="200" y="440" text-anchor="middle" class="lobby__room-label">
             {{ invitationUnlocked ? 'Invitation' : 'Locked' }}
           </text>
@@ -487,21 +490,26 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.03);
+  fill: rgba(200, 169, 110, 0.05);
 }
 
 .lobby__segment--locked .lobby__segment-stroke {
   stroke: var(--color-accent);
-  opacity: 0.2;
+  opacity: 0.15;
+}
+
+.lobby__segment--locked .lobby__room-label {
+  opacity: 0.5;
 }
 
 .lobby__segment--locked.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.06);
+  fill: rgba(200, 169, 110, 0.08);
 }
 
 .lobby__segment--locked .lobby__room-sublabel {
   opacity: 0.9;
   fill: var(--color-accent);
+  font-size: 8px;
 }
 
 .lobby__room-label {
@@ -536,7 +544,8 @@ onUnmounted(() => {
 .lobby__lock-icon {
   color: var(--color-accent);
   opacity: 1;
-  filter: drop-shadow(0 0 6px rgba(200, 169, 110, 0.4));
+  cursor: not-allowed;
+  filter: drop-shadow(0 0 10px rgba(200, 169, 110, 0.5));
   animation: lockBounce 2s ease-in-out infinite;
 }
 
