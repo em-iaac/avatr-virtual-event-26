@@ -143,6 +143,20 @@ function playClick() {
   osc.stop(ctx.currentTime + 0.12)
 }
 
+function playHover() {
+  if (!ctx || !enabled.value) return
+  const osc = ctx.createOscillator()
+  const g = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = 1200
+  g.gain.setValueAtTime(0.03, ctx.currentTime)
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06)
+  osc.connect(g)
+  g.connect(masterGain)
+  osc.start()
+  osc.stop(ctx.currentTime + 0.06)
+}
+
 function playWhoosh() {
   if (!ctx || !enabled.value) return
   const bufLen = Math.floor(ctx.sampleRate * 0.3)
@@ -209,7 +223,7 @@ function playWrong() {
 }
 
 onMounted(() => {
-  window.__avatrSound = { playClick, playWhoosh, playCorrect, playWrong, toggle, enabled }
+  window.__avatrSound = { playClick, playHover, playWhoosh, playCorrect, playWrong, toggle, enabled }
   // Auto-enable sound on mount
   enable()
 })
@@ -221,7 +235,7 @@ onUnmounted(() => {
   delete window.__avatrSound
 })
 
-defineExpose({ toggle, enabled, playClick, playWhoosh, playCorrect, playWrong })
+defineExpose({ toggle, enabled, playClick, playHover, playWhoosh, playCorrect, playWrong })
 </script>
 
 <style scoped>

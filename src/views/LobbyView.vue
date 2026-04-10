@@ -21,68 +21,101 @@
 
     <!-- Emblem Floorplan -->
     <div class="lobby__floorplan">
-      <!-- Base emblem PNG -->
-      <img :src="emblemWhite" alt="" class="lobby__emblem-img" draggable="false" />
-
-      <!-- Interactive overlay SVG (transparent fills only, PNG provides visuals) -->
       <svg
         class="lobby__emblem-svg"
-        viewBox="0 0 668 675"
+        viewBox="0 0 400 560"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="8" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
           </filter>
         </defs>
+
+        <!-- Outer rectangle (structural frame) -->
+        <rect
+          x="60" y="40" width="280" height="480" rx="4"
+          stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+          opacity="0.4"
+        />
 
         <!-- Top triangle segment → Reveal Room -->
         <g
           class="lobby__segment"
           :class="{ 'lobby__segment--active': hoveredRoom === 'reveal' }"
-          @mouseenter="hoveredRoom = 'reveal'"
+          @mouseenter="hoverRoom('reveal')"
           @mouseleave="hoveredRoom = null"
           @click="enterRoom('reveal-room')"
         >
           <path
-            d="M 186 48 L 334 320 L 482 48 Z"
+            d="M 60 40 L 200 456 L 340 40 Z"
             class="lobby__segment-fill"
           />
-          <text x="334" y="155" text-anchor="middle" class="lobby__room-label">Reveal</text>
-          <text x="334" y="178" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
+          <path
+            d="M 60 40 L 200 456 L 340 40"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+            class="lobby__segment-stroke"
+          />
+          <!-- 3D cube icon -->
+          <g class="lobby__room-icon" transform="translate(188, 140)">
+            <path d="M12 2 L22 7 L22 17 L12 22 L2 17 L2 7 Z" stroke="currentColor" stroke-width="1.2" fill="none" />
+            <path d="M12 2 L12 22 M2 7 L12 12 L22 7" stroke="currentColor" stroke-width="1.2" fill="none" />
+          </g>
+          <text x="200" y="190" text-anchor="middle" class="lobby__room-label">Reveal</text>
+          <text x="200" y="210" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
         </g>
 
         <!-- Left segment → Waiting Room -->
         <g
           class="lobby__segment"
           :class="{ 'lobby__segment--active': hoveredRoom === 'waiting' }"
-          @mouseenter="hoveredRoom = 'waiting'"
+          @mouseenter="hoverRoom('waiting')"
           @mouseleave="hoveredRoom = null"
           @click="enterRoom('waiting-room')"
         >
           <path
-            d="M 186 48 L 334 320 L 186 492 Z"
+            d="M 60 40 L 200 456 L 60 520 Z"
             class="lobby__segment-fill"
           />
-          <text x="232" y="290" text-anchor="middle" class="lobby__room-label">Waiting</text>
-          <text x="232" y="313" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
+          <path
+            d="M 60 40 L 200 456 L 60 520"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+            class="lobby__segment-stroke"
+          />
+          <!-- Gamepad icon -->
+          <g class="lobby__room-icon" transform="translate(88, 280)">
+            <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.2" fill="none" />
+            <path d="M8 10 L8 14 M6 12 L10 12 M15 11 L15 11.01 M18 13 L18 13.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+          </g>
+          <text x="100" y="330" text-anchor="middle" class="lobby__room-label">Waiting</text>
+          <text x="100" y="350" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
         </g>
 
         <!-- Right segment → Watching Room -->
         <g
           class="lobby__segment"
           :class="{ 'lobby__segment--active': hoveredRoom === 'watching' }"
-          @mouseenter="hoveredRoom = 'watching'"
+          @mouseenter="hoverRoom('watching')"
           @mouseleave="hoveredRoom = null"
           @click="enterRoom('watching-room')"
         >
           <path
-            d="M 482 48 L 334 320 L 482 492 Z"
+            d="M 340 40 L 200 456 L 340 520 Z"
             class="lobby__segment-fill"
           />
-          <text x="436" y="290" text-anchor="middle" class="lobby__room-label">Premiere</text>
-          <text x="436" y="313" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
+          <path
+            d="M 340 40 L 200 456 L 340 520"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+            class="lobby__segment-stroke"
+          />
+          <!-- Play/video icon -->
+          <g class="lobby__room-icon" transform="translate(288, 280)">
+            <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" />
+            <polygon points="10,9 10,15 15,12" fill="currentColor" />
+          </g>
+          <text x="300" y="330" text-anchor="middle" class="lobby__room-label">Premiere</text>
+          <text x="300" y="350" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
         </g>
 
         <!-- Bottom triangle → Invitation Room (locked) -->
@@ -92,53 +125,68 @@
             'lobby__segment--active': hoveredRoom === 'invitation',
             'lobby__segment--locked': !invitationUnlocked
           }"
-          @mouseenter="hoveredRoom = 'invitation'"
+          @mouseenter="hoverRoom('invitation')"
           @mouseleave="hoveredRoom = null"
           @click="enterInvitation"
         >
           <!-- Invisible hit area -->
           <path
-            d="M 186 492 L 334 320 L 482 492 Z"
+            d="M 60 520 L 200 456 L 340 520 Z"
             fill="transparent"
             pointer-events="all"
             style="cursor: inherit"
           />
-          <!-- Frosted fill (blurred when locked) -->
-          <path
-            v-if="!invitationUnlocked"
-            d="M 186 492 L 334 320 L 482 492 Z"
-            class="lobby__segment-fill"
-            filter="url(#frostedLock)"
-            pointer-events="none"
-          />
-          <!-- Normal fill (when unlocked) -->
-          <path
-            v-else
-            d="M 186 492 L 334 320 L 482 492 Z"
-            class="lobby__segment-fill"
-          />
+          <!-- Frosted shapes (blurred when locked) -->
+          <g v-if="!invitationUnlocked" filter="url(#frostedLock)" pointer-events="none">
+            <path
+              d="M 60 520 L 200 456 L 340 520 Z"
+              class="lobby__segment-fill"
+            />
+            <path
+              d="M 60 520 L 200 456 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+              class="lobby__segment-stroke"
+            />
+          </g>
+          <!-- Normal shapes (when unlocked) -->
+          <g v-else>
+            <path
+              d="M 60 520 L 200 456 L 340 520 Z"
+              class="lobby__segment-fill"
+            />
+            <path
+              d="M 60 520 L 200 456 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
+              class="lobby__segment-stroke"
+            />
+          </g>
           <!-- Semi-transparent frost overlay -->
           <path
             v-if="!invitationUnlocked"
-            d="M 186 492 L 334 320 L 482 492 Z"
-            fill="rgba(6,6,8,0.65)"
+            d="M 60 520 L 200 456 L 340 520 Z"
+            fill="rgba(6,6,8,0.7)"
             pointer-events="none"
           />
 
           <!-- Labels -->
-          <text x="334" y="430" text-anchor="middle" class="lobby__room-label" pointer-events="none">
+          <text x="200" y="498" text-anchor="middle" class="lobby__room-label" pointer-events="none">
             {{ invitationUnlocked ? 'Invitation' : 'Locked' }}
           </text>
-          <text x="334" y="453" text-anchor="middle" class="lobby__room-sublabel" pointer-events="none">
+          <text x="200" y="512" text-anchor="middle" class="lobby__room-sublabel" pointer-events="none">
             {{ invitationUnlocked ? 'RSVP & Exclusive' : 'Complete the Quiz' }}
           </text>
         </g>
 
         <!-- Lock icon -->
         <g v-if="!invitationUnlocked" class="lobby__lock-icon" @click="enterInvitation">
-          <rect x="318" y="378" width="32" height="26" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" />
-          <path d="M324 378 V370 A10 10 0 0 1 344 370 V378" stroke="currentColor" stroke-width="1.5" fill="none" />
-          <circle cx="334" cy="391" r="2.5" fill="currentColor" />
+          <rect x="190" y="482" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" />
+          <path d="M194 482 V478 A6 6 0 0 1 206 478 V482" stroke="currentColor" stroke-width="1.2" fill="none" />
+          <circle cx="200" cy="490" r="1.5" fill="currentColor" />
+        </g>
+        <!-- Envelope icon (when unlocked) -->
+        <g v-else class="lobby__room-icon lobby__room-icon--invitation" transform="translate(188, 478)">
+          <rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" />
+          <path d="M2 4 L12 12 L22 4" stroke="currentColor" stroke-width="1.2" fill="none" />
         </g>
       </svg>
     </div>
@@ -198,7 +246,6 @@ import CountdownTimer from '../components/CountdownTimer.vue'
 import MagneticButton from '../components/MagneticButton.vue'
 
 import textLogoWhite from '../assets/avatr-text-logo-white.png'
-import emblemWhite from '../assets/avatr-logo-emblem-white.png'
 
 const router = useRouter()
 const phase = ref(getEventPhase())
@@ -229,6 +276,13 @@ const mobileRooms = computed(() => [
 function enterRoom(routeName) {
   window.__avatrSound?.playWhoosh()
   router.push({ name: routeName })
+}
+
+function hoverRoom(room) {
+  if (hoveredRoom.value !== room) {
+    hoveredRoom.value = room
+    window.__avatrSound?.playHover()
+  }
 }
 
 function enterInvitation() {
@@ -441,25 +495,9 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.lobby__emblem-img {
-  display: block;
+.lobby__emblem-svg {
   width: 100%;
   height: auto;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0.55;
-  transition: opacity 0.4s ease;
-}
-
-.lobby__floorplan:hover .lobby__emblem-img {
-  opacity: 0.75;
-}
-
-.lobby__emblem-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
 }
 
 /* Segments */
@@ -469,12 +507,22 @@ onUnmounted(() => {
 }
 
 .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.0);
+  fill: rgba(200, 169, 110, 0.02);
   transition: fill 0.4s ease;
 }
 
+.lobby__segment-stroke {
+  opacity: 0.4;
+  transition: opacity 0.3s ease, stroke-width 0.3s ease;
+}
+
 .lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.1);
+  fill: rgba(200, 169, 110, 0.08);
+}
+
+.lobby__segment--active .lobby__segment-stroke {
+  opacity: 1;
+  stroke-width: 1.5;
 }
 
 .lobby__segment--locked {
@@ -482,7 +530,12 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.03);
+  fill: rgba(100, 90, 70, 0.06);
+}
+
+.lobby__segment--locked .lobby__segment-stroke {
+  stroke: var(--color-muted);
+  opacity: 0.2;
 }
 
 .lobby__segment--locked .lobby__room-label {
@@ -490,18 +543,18 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.06);
+  fill: rgba(100, 90, 70, 0.1);
 }
 
 .lobby__segment--locked .lobby__room-sublabel {
   opacity: 0.9;
   fill: var(--color-accent);
-  font-size: 11px;
+  font-size: 8px;
 }
 
 .lobby__room-label {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
   fill: var(--color-text);
   letter-spacing: 0.06em;
@@ -516,7 +569,7 @@ onUnmounted(() => {
 
 .lobby__room-sublabel {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 9px;
   fill: var(--color-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -530,10 +583,26 @@ onUnmounted(() => {
 
 .lobby__lock-icon {
   color: var(--color-accent);
-  opacity: 1;
+  opacity: 0.7;
   cursor: not-allowed;
-  filter: drop-shadow(0 0 10px rgba(200, 169, 110, 0.5));
+  filter: drop-shadow(0 0 6px rgba(200, 169, 110, 0.3));
   animation: lockBounce 2s ease-in-out infinite;
+}
+
+.lobby__room-icon {
+  color: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.lobby__room-icon--invitation {
+  color: var(--color-accent);
+  opacity: 0;
+}
+
+.lobby__segment--active .lobby__room-icon {
+  opacity: 0.8;
 }
 
 @keyframes lockBounce {
@@ -712,15 +781,15 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .lobby__floorplan {
-    width: clamp(200px, 60vw, 280px);
+    width: clamp(180px, 55vw, 240px);
   }
 
   .lobby__room-label {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .lobby__room-sublabel {
-    font-size: 10px;
+    font-size: 8px;
   }
 
   .lobby__mobile-rooms {

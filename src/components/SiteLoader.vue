@@ -2,24 +2,7 @@
   <Transition name="loader-fade">
     <div v-if="visible" class="loader">
       <div class="loader__content">
-        <!-- SVG emblem that draws itself -->
-        <svg class="loader__emblem" viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Outer rectangle -->
-          <path
-            class="loader__path loader__path--1"
-            d="M 15 10 L 85 10 L 85 130 L 15 130 Z"
-            stroke="var(--color-accent)"
-            stroke-width="1.5"
-          />
-          <!-- Inner lines (converge at single point) -->
-          <path
-            class="loader__path loader__path--2"
-            d="M 15 10 L 50 80 L 85 10 M 15 130 L 50 80 L 85 130"
-            stroke="var(--color-accent)"
-            stroke-width="1.5"
-          />
-        </svg>
-        <span class="loader__text">AVATR</span>
+        <img :src="emblemWhite" alt="" class="loader__emblem" draggable="false" />
       </div>
     </div>
   </Transition>
@@ -27,6 +10,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import emblemWhite from '../assets/avatr-logo-emblem-white.png'
 
 const visible = ref(true)
 
@@ -60,45 +44,32 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
 }
 
 .loader__emblem {
   width: 60px;
   height: auto;
-}
-
-.loader__path {
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  fill: none;
-}
-
-.loader__path--1 {
-  animation: drawPath 1s ease-out 0.2s forwards;
-}
-
-.loader__path--2 {
-  animation: drawPath 1s ease-out 0.6s forwards;
-}
-
-@keyframes drawPath {
-  to { stroke-dashoffset: 0; }
-}
-
-.loader__text {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.35em;
-  color: var(--color-accent);
   opacity: 0;
-  animation: loaderTextIn 0.6s ease-out 1s forwards;
+  animation: emblemReveal 1.2s ease-out 0.2s forwards;
+  filter: drop-shadow(0 0 0px rgba(200, 169, 110, 0));
 }
 
-@keyframes loaderTextIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 0.8; transform: translateY(0); }
+@keyframes emblemReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+    filter: drop-shadow(0 0 0px rgba(200, 169, 110, 0));
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 20px rgba(200, 169, 110, 0.3));
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(200, 169, 110, 0.15));
+  }
 }
 
 /* Transition */
