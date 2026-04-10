@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Redirecting…</title>
+    <script>
+      // GitHub Pages SPA redirect
+      // Stores the real URL and redirects to index.html so Vue Router can handle it
+      var pathSegmentsToKeep = 1; // keep '/avatr-virtual-event-26'
+      var l = window.location;
+      var repo = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/');
+      var route = l.pathname.slice(repo.length) || '/';
+      var fullUrl = repo + route + l.search + l.hash;
+      sessionStorage.redirect = fullUrl;
+      l.replace(repo + '/');
+    </script>
+  </head>
+  <body></body>
+</html>
