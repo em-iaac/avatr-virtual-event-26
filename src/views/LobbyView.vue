@@ -165,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { EVENT, getEventPhase } from '../config.js'
 import CountdownTimer from '../components/CountdownTimer.vue'
@@ -185,7 +185,7 @@ function refreshLockState() {
   invitationUnlocked.value = !!localStorage.getItem('avatr-quiz-completed')
 }
 
-const mobileRooms = ref([
+const mobileRooms = computed(() => [
   { route: 'waiting-room', label: 'Waiting Room', sub: 'Games & History' },
   { route: 'reveal-room', label: 'Reveal Room', sub: '3D Car Model' },
   { route: 'watching-room', label: 'Premiere', sub: 'Watch the Show' },
