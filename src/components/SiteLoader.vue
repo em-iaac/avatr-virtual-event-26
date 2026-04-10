@@ -11,17 +11,10 @@
             stroke="var(--color-accent)"
             stroke-width="1.5"
           />
-          <!-- Inner diamond / hourglass shape -->
+          <!-- Inner lines (converge at single point) -->
           <path
             class="loader__path loader__path--2"
-            d="M 15 10 L 50 60 L 85 10 M 15 130 L 50 80 L 85 130"
-            stroke="var(--color-accent)"
-            stroke-width="1.5"
-          />
-          <!-- Center connector -->
-          <path
-            class="loader__path loader__path--3"
-            d="M 50 60 L 50 80"
+            d="M 15 10 L 50 80 L 85 10 M 15 130 L 50 80 L 85 130"
             stroke="var(--color-accent)"
             stroke-width="1.5"
           />
@@ -89,12 +82,6 @@ onMounted(() => {
   animation: drawPath 1s ease-out 0.6s forwards;
 }
 
-.loader__path--3 {
-  stroke-dasharray: 30;
-  stroke-dashoffset: 30;
-  animation: drawPath 0.4s ease-out 1s forwards;
-}
-
 @keyframes drawPath {
   to { stroke-dashoffset: 0; }
 }
@@ -106,7 +93,7 @@ onMounted(() => {
   letter-spacing: 0.35em;
   color: var(--color-accent);
   opacity: 0;
-  animation: loaderTextIn 0.6s ease-out 1.2s forwards;
+  animation: loaderTextIn 0.6s ease-out 1s forwards;
 }
 
 @keyframes loaderTextIn {

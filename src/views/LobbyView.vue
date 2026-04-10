@@ -36,7 +36,7 @@
         <!-- Outer rectangle (structural frame) -->
         <rect
           x="60" y="40" width="280" height="480" rx="4"
-          stroke="rgba(200,169,110,0.15)" stroke-width="1" fill="none"
+          stroke="rgba(200,169,110,0.15)" stroke-width="1.5" fill="none"
         />
 
         <!-- Top triangle segment → Reveal Room -->
@@ -48,16 +48,16 @@
           @click="enterRoom('reveal-room')"
         >
           <path
-            d="M 60 40 L 200 240 L 340 40 Z"
+            d="M 60 40 L 200 318 L 340 40 Z"
             class="lobby__segment-fill"
           />
           <path
-            d="M 60 40 L 200 240 L 340 40"
-            stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+            d="M 60 40 L 200 318 L 340 40"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
             class="lobby__segment-stroke"
           />
-          <text x="200" y="120" text-anchor="middle" class="lobby__room-label">Reveal</text>
-          <text x="200" y="140" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
+          <text x="200" y="135" text-anchor="middle" class="lobby__room-label">Reveal</text>
+          <text x="200" y="155" text-anchor="middle" class="lobby__room-sublabel">3D Model Experience</text>
         </g>
 
         <!-- Left segment → Waiting Room -->
@@ -69,16 +69,16 @@
           @click="enterRoom('waiting-room')"
         >
           <path
-            d="M 60 40 L 200 240 L 60 520 Z"
+            d="M 60 40 L 200 318 L 60 520 Z"
             class="lobby__segment-fill"
           />
           <path
-            d="M 60 40 L 200 240 L 60 520"
-            stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+            d="M 60 40 L 200 318 L 60 520"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
             class="lobby__segment-stroke"
           />
-          <text x="115" y="280" text-anchor="middle" class="lobby__room-label">Waiting</text>
-          <text x="115" y="300" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
+          <text x="110" y="285" text-anchor="middle" class="lobby__room-label">Waiting</text>
+          <text x="110" y="305" text-anchor="middle" class="lobby__room-sublabel">Games & History</text>
         </g>
 
         <!-- Right segment → Watching Room -->
@@ -90,16 +90,16 @@
           @click="enterRoom('watching-room')"
         >
           <path
-            d="M 340 40 L 200 240 L 340 520 Z"
+            d="M 340 40 L 200 318 L 340 520 Z"
             class="lobby__segment-fill"
           />
           <path
-            d="M 340 40 L 200 240 L 340 520"
-            stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+            d="M 340 40 L 200 318 L 340 520"
+            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
             class="lobby__segment-stroke"
           />
-          <text x="285" y="280" text-anchor="middle" class="lobby__room-label">Premiere</text>
-          <text x="285" y="300" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
+          <text x="290" y="285" text-anchor="middle" class="lobby__room-label">Premiere</text>
+          <text x="290" y="305" text-anchor="middle" class="lobby__room-sublabel">Watch the Show</text>
         </g>
 
         <!-- Bottom triangle / diamond → Invitation Room (locked) -->
@@ -115,7 +115,7 @@
         >
           <!-- Invisible hit area (always captures pointer events regardless of filter) -->
           <path
-            d="M 60 520 L 200 320 L 340 520 Z"
+            d="M 60 520 L 200 318 L 340 520 Z"
             fill="transparent"
             pointer-events="all"
             style="cursor: inherit"
@@ -123,31 +123,31 @@
           <!-- Frosted shapes (blurred when locked) -->
           <g v-if="!invitationUnlocked" filter="url(#frostedLock)" pointer-events="none">
             <path
-              d="M 60 520 L 200 320 L 340 520 Z"
+              d="M 60 520 L 200 318 L 340 520 Z"
               class="lobby__segment-fill"
             />
             <path
-              d="M 60 520 L 200 320 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+              d="M 60 520 L 200 318 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
               class="lobby__segment-stroke"
             />
           </g>
           <!-- Normal shapes (when unlocked) -->
           <g v-else>
             <path
-              d="M 60 520 L 200 320 L 340 520 Z"
+              d="M 60 520 L 200 318 L 340 520 Z"
               class="lobby__segment-fill"
             />
             <path
-              d="M 60 520 L 200 320 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.2" fill="none"
+              d="M 60 520 L 200 318 L 340 520"
+              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
               class="lobby__segment-stroke"
             />
           </g>
           <!-- Semi-transparent frost overlay (not blurred) -->
           <path
             v-if="!invitationUnlocked"
-            d="M 60 520 L 200 320 L 340 520 Z"
+            d="M 60 520 L 200 318 L 340 520 Z"
             fill="rgba(6,6,8,0.7)"
             pointer-events="none"
           />
@@ -168,15 +168,7 @@
           <circle cx="200" cy="398" r="2.5" fill="currentColor" />
         </g>
 
-        <!-- Center diamond intersection point -->
-        <path
-          d="M 200 220 L 220 240 L 200 260 L 180 240 Z"
-          fill="var(--color-accent)" opacity="0.2"
-          class="lobby__center-diamond"
-        />
 
-        <!-- Center connector line -->
-        <line x1="200" y1="260" x2="200" y2="320" stroke="var(--color-accent)" stroke-width="1" opacity="0.3" />
       </svg>
     </div>
 
@@ -576,11 +568,6 @@ onUnmounted(() => {
   50% { transform: translateY(-3px); }
 }
 
-.lobby__center-diamond {
-  animation: diamondPulse 3s ease-in-out infinite;
-  transform-origin: 200px 240px;
-}
-
 /* Mobile fallback cards */
 .lobby__mobile-rooms {
   display: none;
@@ -752,7 +739,15 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .lobby__floorplan {
-    display: none;
+    width: clamp(180px, 55vw, 240px);
+  }
+
+  .lobby__room-label {
+    font-size: 18px;
+  }
+
+  .lobby__room-sublabel {
+    font-size: 12px;
   }
 
   .lobby__mobile-rooms {
