@@ -137,17 +137,32 @@ The Invitation room checks `localStorage('avatr-quiz-completed')` via a `beforeE
 
 ## Getting Started
 
+> **Every time you open the project**, you need to start the dev server to view it locally.
+
+### 1. Install dependencies (first time only, or after adding new packages)
+
 ```bash
-# Install dependencies
 npm install
+```
 
-# Start development server
+### 2. Start the development server
+
+```bash
 npm run dev
+```
 
+This starts Vite and serves the site at:  
+**http://localhost:5173/avatr-virtual-event-26/**
+
+> The server must stay running in the terminal while you work. If you close the terminal or restart your computer, run `npm run dev` again.
+
+### 3. Other commands
+
+```bash
 # Build for production
 npm run build
 
-# Preview production build
+# Preview production build locally
 npm run preview
 ```
 

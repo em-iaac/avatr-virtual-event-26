@@ -46,7 +46,7 @@
           :class="{ 'lobby__segment--active': hoveredRoom === 'reveal' }"
           @mouseenter="hoverRoom('reveal')"
           @mouseleave="hoveredRoom = null"
-          @click="enterRoom('reveal-room')"
+          @click="enterRoom('reveal-room', 'reveal')"
         >
           <path
             d="M 60 40 L 200 456 L 340 40 Z"
@@ -72,7 +72,7 @@
           :class="{ 'lobby__segment--active': hoveredRoom === 'waiting' }"
           @mouseenter="hoverRoom('waiting')"
           @mouseleave="hoveredRoom = null"
-          @click="enterRoom('waiting-room')"
+          @click="enterRoom('waiting-room', 'waiting')"
         >
           <path
             d="M 60 40 L 200 456 L 60 520 Z"
@@ -98,7 +98,7 @@
           :class="{ 'lobby__segment--active': hoveredRoom === 'watching' }"
           @mouseenter="hoverRoom('watching')"
           @mouseleave="hoveredRoom = null"
-          @click="enterRoom('watching-room')"
+          @click="enterRoom('watching-room', 'watching')"
         >
           <path
             d="M 340 40 L 200 456 L 340 520 Z"
@@ -252,6 +252,7 @@ const phase = ref(getEventPhase())
 const hoveredRoom = ref(null)
 const particles = ref(null)
 const showLockModal = ref(false)
+const isTouchDevice = ref(false)
 let animFrame = null
 let particleList = []
 
@@ -273,7 +274,13 @@ const mobileRooms = computed(() => [
   },
 ])
 
-function enterRoom(routeName) {
+function enterRoom(routeName, roomKey) {
+  // On touch devices: first tap selects, second tap enters
+  if (isTouchDevice.value && roomKey && hoveredRoom.value !== roomKey) {
+    hoveredRoom.value = roomKey
+    window.__avatrSound?.playHover()
+    return
+  }
   window.__avatrSound?.playWhoosh()
   router.push({ name: routeName })
 }
@@ -286,6 +293,12 @@ function hoverRoom(room) {
 }
 
 function enterInvitation() {
+  // On touch devices: first tap selects, second tap acts
+  if (isTouchDevice.value && hoveredRoom.value !== 'invitation') {
+    hoveredRoom.value = 'invitation'
+    window.__avatrSound?.playHover()
+    return
+  }
   // Re-check localStorage at click time to ensure fresh state
   refreshLockState()
   if (!invitationUnlocked.value) {
@@ -370,6 +383,7 @@ function initParticles() {
 }
 
 onMounted(() => {
+  isTouchDevice.value = 'ontouchstart' in window || navigator.maxTouchPoints > 0
   refreshLockState()
   document.addEventListener('visibilitychange', refreshLockState)
   document.addEventListener('keydown', onEscKey)

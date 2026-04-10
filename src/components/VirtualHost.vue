@@ -43,7 +43,7 @@
     >
       <div class="host-mini__halo"></div>
       <img :src="hostFigure" alt="Ava" class="host-mini__image" />
-      <span class="host-mini__label">Ava</span>
+      <span class="host-mini__greeting">Hello, I'm your host</span>
     </button>
   </Transition>
 </template>
@@ -74,7 +74,7 @@ function isArabic(text) {
   return /[\u0600-\u06FF]/.test(text.charAt(0))
 }
 
-const showMini = computed(() => !visible.value && hasBeenShown.value && route?.name === 'lobby')
+const showMini = computed(() => !visible.value && route?.name === 'lobby')
 
 function playNarration() {
   stopNarration()
@@ -102,18 +102,9 @@ function reopen() {
   playNarration()
 }
 
-// Auto-show in the lobby once per session
+// Hide overlay when leaving the lobby
 watch(() => route?.name, (roomName) => {
-  if (roomName === 'lobby' && !hasBeenShown.value && !sessionStorage.getItem('avatr-host-shown')) {
-    sessionStorage.setItem('avatr-host-shown', '1')
-    setTimeout(() => {
-      visible.value = true
-      hasBeenShown.value = true
-      playNarration()
-    }, 1000)
-  } else if (roomName === 'lobby' && !hasBeenShown.value) {
-    hasBeenShown.value = true
-  } else if (roomName !== 'lobby') {
+  if (roomName !== 'lobby') {
     visible.value = false
     stopNarration()
   }
@@ -269,6 +260,7 @@ onUnmounted(() => {
   line-height: 1.65;
   opacity: 0.92;
   margin: 0;
+  text-align: center;
 }
 
 .host-bubble__line--ar {
@@ -349,12 +341,29 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
-.host-mini__label {
+.host-mini__greeting {
   font-family: var(--font-display);
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   color: var(--color-accent);
   white-space: nowrap;
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  animation: greetingReveal 1.2s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes greetingReveal {
+  from {
+    max-width: 0;
+    opacity: 0;
+    padding-right: 0;
+  }
+  to {
+    max-width: 200px;
+    opacity: 1;
+    padding-right: 4px;
+  }
 }
 
 /* ── Overlay transition ── */
@@ -481,7 +490,7 @@ onUnmounted(() => {
     height: 44px;
   }
 
-  .host-mini__label {
+  .host-mini__greeting {
     font-size: 0.6rem;
   }
 }
