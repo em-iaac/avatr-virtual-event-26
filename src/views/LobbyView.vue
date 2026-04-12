@@ -33,72 +33,111 @@
             <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
           </filter>
 
-          <!-- Feathered glow behind strokes -->
-          <filter id="strokeGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-            <feColorMatrix in="blur" type="matrix"
-              values="1 0 0 0 0
-                      0 0.85 0 0 0
-                      0 0 0.55 0 0
-                      0 0 0 0.6 0" result="gold" />
-            <feMerge>
-              <feMergeNode in="gold" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
+          <!-- Gradient: bright gold top → dark bronze bottom -->
+          <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#e8d5a0" />
+            <stop offset="40%" stop-color="#c8a96e" />
+            <stop offset="100%" stop-color="#6b5530" />
+          </linearGradient>
 
-          <!-- Outer wide feather for ambient depth -->
-          <filter id="strokeFeather" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="wide" />
-            <feColorMatrix in="wide" type="matrix"
-              values="1 0 0 0 0
-                      0 0.85 0 0 0
-                      0 0 0.55 0 0
-                      0 0 0 0.25 0" />
-          </filter>
+          <!-- Highlight gradient (top-lit edge) -->
+          <linearGradient id="highlightGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#fff5d6" stop-opacity="0.9" />
+            <stop offset="50%" stop-color="#e8d5a0" stop-opacity="0.3" />
+            <stop offset="100%" stop-color="#6b5530" stop-opacity="0" />
+          </linearGradient>
 
-          <!-- 3D bevel lighting on strokes -->
-          <filter id="bevel3D" x="-10%" y="-10%" width="120%" height="120%">
-            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blurAlpha" />
-            <feSpecularLighting in="blurAlpha" surfaceScale="4" specularConstant="0.8" specularExponent="20" result="spec">
-              <fePointLight x="200" y="100" z="200" />
+          <!-- Shadow gradient (bottom shadow edge) -->
+          <linearGradient id="shadowGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0" />
+            <stop offset="60%" stop-color="#1a1208" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0.7" />
+          </linearGradient>
+
+          <!-- Outer frame gradient -->
+          <linearGradient id="frameGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#d4be84" />
+            <stop offset="50%" stop-color="#9a7d4a" />
+            <stop offset="100%" stop-color="#4a3820" />
+          </linearGradient>
+
+          <!-- Heavy emboss: strong specular + offset light/dark -->
+          <filter id="emboss" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blurA" />
+            <feSpecularLighting in="blurA" surfaceScale="8" specularConstant="1.2" specularExponent="12" result="spec">
+              <fePointLight x="180" y="60" z="300" />
             </feSpecularLighting>
             <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClip" />
-            <feComposite in="SourceGraphic" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.4" k4="0" />
+            <feComposite in="SourceGraphic" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.7" k4="0" />
           </filter>
 
-          <!-- Combined 3D stroke: glow + bevel -->
-          <filter id="stroke3D" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="glow" />
+          <!-- Wide ambient glow -->
+          <filter id="ambientGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="wide" />
+            <feColorMatrix in="wide" type="matrix"
+              values="1 0 0 0 0.1
+                      0 0.85 0 0 0.05
+                      0 0 0.45 0 0
+                      0 0 0 0.4 0" />
+          </filter>
+
+          <!-- Medium glow halo -->
+          <filter id="mediumGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="glow" />
             <feColorMatrix in="glow" type="matrix"
-              values="1 0 0 0 0
-                      0 0.85 0 0 0
-                      0 0 0.55 0 0
-                      0 0 0 0.5 0" result="goldGlow" />
-            <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blurA" />
-            <feSpecularLighting in="blurA" surfaceScale="3" specularConstant="0.6" specularExponent="16" result="light">
-              <fePointLight x="200" y="80" z="180" />
+              values="1 0 0 0 0.05
+                      0 0.85 0 0 0.02
+                      0 0 0.5 0 0
+                      0 0 0 0.7 0" />
+          </filter>
+
+          <!-- Active state: full emboss + glow combo -->
+          <filter id="activeEmboss" x="-40%" y="-40%" width="180%" height="180%">
+            <!-- Outer glow -->
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="glow" />
+            <feColorMatrix in="glow" type="matrix"
+              values="1 0 0 0 0.1
+                      0 0.85 0 0 0.05
+                      0 0 0.45 0 0
+                      0 0 0 0.8 0" result="goldGlow" />
+            <!-- Strong specular bevel -->
+            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blurA" />
+            <feSpecularLighting in="blurA" surfaceScale="12" specularConstant="1.5" specularExponent="10" result="spec">
+              <fePointLight x="160" y="40" z="350" />
             </feSpecularLighting>
-            <feComposite in="light" in2="SourceAlpha" operator="in" result="litEdge" />
+            <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClip" />
+            <!-- Combine: glow behind, source, specular on top -->
             <feMerge>
               <feMergeNode in="goldGlow" />
               <feMergeNode in="SourceGraphic" />
-              <feMergeNode in="litEdge" />
+              <feMergeNode in="specClip" />
             </feMerge>
           </filter>
         </defs>
 
-        <!-- Outer rectangle — deep feather layer -->
+        <!-- Outer rectangle — ambient glow layer -->
         <rect
           x="60" y="40" width="280" height="480" rx="4"
-          stroke="var(--color-accent)" stroke-width="2" fill="none"
-          opacity="0.3" filter="url(#strokeFeather)"
+          stroke="url(#goldGrad)" stroke-width="3" fill="none"
+          opacity="0.4" filter="url(#ambientGlow)"
         />
-        <!-- Outer rectangle (structural frame) -->
+        <!-- Outer rectangle — shadow offset (bottom-right) -->
+        <rect
+          x="61" y="42" width="280" height="480" rx="4"
+          stroke="url(#shadowGrad)" stroke-width="2" fill="none"
+          opacity="0.5"
+        />
+        <!-- Outer rectangle — main gradient stroke -->
         <rect
           x="60" y="40" width="280" height="480" rx="4"
-          stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-          opacity="0.5" filter="url(#strokeGlow)"
+          stroke="url(#frameGrad)" stroke-width="1.8" fill="none"
+          opacity="0.6" filter="url(#emboss)"
+        />
+        <!-- Outer rectangle — highlight offset (top-left) -->
+        <rect
+          x="59" y="39" width="280" height="480" rx="4"
+          stroke="url(#highlightGrad)" stroke-width="0.8" fill="none"
+          opacity="0.5"
         />
 
         <!-- Top triangle segment → Reveal Room -->
@@ -113,17 +152,14 @@
             d="M 60 40 L 200 456 L 340 40 Z"
             class="lobby__segment-fill"
           />
-          <!-- Feather layer -->
-          <path
-            d="M 60 40 L 200 456 L 340 40"
-            stroke="var(--color-accent)" stroke-width="2" fill="none"
-            class="lobby__segment-feather"
-          />
-          <path
-            d="M 60 40 L 200 456 L 340 40"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
+          <!-- Ambient glow -->
+          <path d="M 60 40 L 200 456 L 340 40" stroke="url(#goldGrad)" stroke-width="3" fill="none" class="lobby__segment-glow" />
+          <!-- Shadow offset (bottom-right) -->
+          <path d="M 61 42 L 201 458 L 341 42" stroke="url(#shadowGrad)" stroke-width="2" fill="none" class="lobby__segment-shadow" />
+          <!-- Main gradient stroke with emboss -->
+          <path d="M 60 40 L 200 456 L 340 40" stroke="url(#goldGrad)" stroke-width="2" fill="none" class="lobby__segment-stroke" />
+          <!-- Highlight offset (top-left) -->
+          <path d="M 59 39 L 199 455 L 339 39" stroke="url(#highlightGrad)" stroke-width="0.8" fill="none" class="lobby__segment-highlight" />
           <!-- 3D cube icon -->
           <g class="lobby__room-icon" transform="translate(188, 140)">
             <path d="M12 2 L22 7 L22 17 L12 22 L2 17 L2 7 Z" stroke="currentColor" stroke-width="1.2" fill="none" />
@@ -145,17 +181,14 @@
             d="M 60 40 L 200 456 L 60 520 Z"
             class="lobby__segment-fill"
           />
-          <!-- Feather layer -->
-          <path
-            d="M 60 40 L 200 456 L 60 520"
-            stroke="var(--color-accent)" stroke-width="2" fill="none"
-            class="lobby__segment-feather"
-          />
-          <path
-            d="M 60 40 L 200 456 L 60 520"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
+          <!-- Ambient glow -->
+          <path d="M 60 40 L 200 456 L 60 520" stroke="url(#goldGrad)" stroke-width="3" fill="none" class="lobby__segment-glow" />
+          <!-- Shadow offset -->
+          <path d="M 61 42 L 201 458 L 61 522" stroke="url(#shadowGrad)" stroke-width="2" fill="none" class="lobby__segment-shadow" />
+          <!-- Main gradient stroke -->
+          <path d="M 60 40 L 200 456 L 60 520" stroke="url(#goldGrad)" stroke-width="2" fill="none" class="lobby__segment-stroke" />
+          <!-- Highlight offset -->
+          <path d="M 59 39 L 199 455 L 59 519" stroke="url(#highlightGrad)" stroke-width="0.8" fill="none" class="lobby__segment-highlight" />
           <!-- Gamepad icon -->
           <g class="lobby__room-icon" transform="translate(88, 280)">
             <rect x="2" y="6" width="20" height="12" rx="3" stroke="currentColor" stroke-width="1.2" fill="none" />
@@ -177,17 +210,14 @@
             d="M 340 40 L 200 456 L 340 520 Z"
             class="lobby__segment-fill"
           />
-          <!-- Feather layer -->
-          <path
-            d="M 340 40 L 200 456 L 340 520"
-            stroke="var(--color-accent)" stroke-width="2" fill="none"
-            class="lobby__segment-feather"
-          />
-          <path
-            d="M 340 40 L 200 456 L 340 520"
-            stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-            class="lobby__segment-stroke"
-          />
+          <!-- Ambient glow -->
+          <path d="M 340 40 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="3" fill="none" class="lobby__segment-glow" />
+          <!-- Shadow offset -->
+          <path d="M 341 42 L 201 458 L 341 522" stroke="url(#shadowGrad)" stroke-width="2" fill="none" class="lobby__segment-shadow" />
+          <!-- Main gradient stroke -->
+          <path d="M 340 40 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="2" fill="none" class="lobby__segment-stroke" />
+          <!-- Highlight offset -->
+          <path d="M 339 39 L 199 455 L 339 519" stroke="url(#highlightGrad)" stroke-width="0.8" fill="none" class="lobby__segment-highlight" />
           <!-- Play/video icon -->
           <g class="lobby__room-icon" transform="translate(288, 280)">
             <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.2" fill="none" />
@@ -217,37 +247,19 @@
           />
           <!-- Frosted shapes (blurred when locked) -->
           <g v-if="!invitationUnlocked" filter="url(#frostedLock)" pointer-events="none">
-            <path
-              d="M 60 520 L 200 456 L 340 520 Z"
-              class="lobby__segment-fill"
-            />
-            <path
-              d="M 60 520 L 200 456 L 340 520"
-              stroke="var(--color-accent)" stroke-width="2" fill="none"
-              class="lobby__segment-feather"
-            />
-            <path
-              d="M 60 520 L 200 456 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-              class="lobby__segment-stroke"
-            />
+            <path d="M 60 520 L 200 456 L 340 520 Z" class="lobby__segment-fill" />
+            <path d="M 60 520 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="3" fill="none" class="lobby__segment-glow" />
+            <path d="M 61 522 L 201 458 L 341 522" stroke="url(#shadowGrad)" stroke-width="2" fill="none" class="lobby__segment-shadow" />
+            <path d="M 60 520 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="2" fill="none" class="lobby__segment-stroke" />
+            <path d="M 59 519 L 199 455 L 339 519" stroke="url(#highlightGrad)" stroke-width="0.8" fill="none" class="lobby__segment-highlight" />
           </g>
           <!-- Normal shapes (when unlocked) -->
           <g v-else>
-            <path
-              d="M 60 520 L 200 456 L 340 520 Z"
-              class="lobby__segment-fill"
-            />
-            <path
-              d="M 60 520 L 200 456 L 340 520"
-              stroke="var(--color-accent)" stroke-width="2" fill="none"
-              class="lobby__segment-feather"
-            />
-            <path
-              d="M 60 520 L 200 456 L 340 520"
-              stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-              class="lobby__segment-stroke"
-            />
+            <path d="M 60 520 L 200 456 L 340 520 Z" class="lobby__segment-fill" />
+            <path d="M 60 520 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="3" fill="none" class="lobby__segment-glow" />
+            <path d="M 61 522 L 201 458 L 341 522" stroke="url(#shadowGrad)" stroke-width="2" fill="none" class="lobby__segment-shadow" />
+            <path d="M 60 520 L 200 456 L 340 520" stroke="url(#goldGrad)" stroke-width="2" fill="none" class="lobby__segment-stroke" />
+            <path d="M 59 519 L 199 455 L 339 519" stroke="url(#highlightGrad)" stroke-width="0.8" fill="none" class="lobby__segment-highlight" />
           </g>
           <!-- Semi-transparent frost overlay -->
           <path
@@ -556,8 +568,9 @@ onUnmounted(() => {
 .lobby__logo {
   height: clamp(28px, 5vw, 42px);
   width: auto;
-  filter: drop-shadow(0 0 12px rgba(200, 169, 110, 0.15))
-          drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 0 18px rgba(200, 169, 110, 0.25))
+          drop-shadow(0 0 40px rgba(200, 169, 110, 0.1))
+          drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
 }
 
 .lobby__subtitle {
@@ -607,8 +620,9 @@ onUnmounted(() => {
 .lobby__emblem-svg {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 0 24px rgba(200, 169, 110, 0.08))
-          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 0 30px rgba(200, 169, 110, 0.12))
+          drop-shadow(0 0 60px rgba(200, 169, 110, 0.06))
+          drop-shadow(0 6px 20px rgba(0, 0, 0, 0.4));
 }
 
 /* Segments */
@@ -623,32 +637,56 @@ onUnmounted(() => {
   transition: fill 0.4s ease;
 }
 
-/* Feathered glow layer behind each stroke */
-.lobby__segment-feather {
-  opacity: 0.15;
-  filter: url(#strokeFeather);
+/* Ambient glow behind strokes */
+.lobby__segment-glow {
+  opacity: 0.2;
+  filter: url(#mediumGlow);
+  transition: opacity 0.4s ease, filter 0.4s ease;
+  pointer-events: none;
+}
+
+/* Shadow offset — dark edge below/right */
+.lobby__segment-shadow {
+  opacity: 0.35;
   transition: opacity 0.4s ease;
   pointer-events: none;
 }
 
+/* Main gradient stroke with emboss */
 .lobby__segment-stroke {
-  opacity: 0.4;
-  filter: url(#strokeGlow);
+  opacity: 0.5;
+  filter: url(#emboss);
   transition: opacity 0.3s ease, stroke-width 0.3s ease, filter 0.4s ease;
 }
 
-.lobby__segment--active .lobby__segment-fill {
-  fill: rgba(200, 169, 110, 0.08);
+/* Highlight offset — bright edge above/left */
+.lobby__segment-highlight {
+  opacity: 0.3;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
-.lobby__segment--active .lobby__segment-feather {
-  opacity: 0.35;
+.lobby__segment--active .lobby__segment-fill {
+  fill: rgba(200, 169, 110, 0.1);
+}
+
+.lobby__segment--active .lobby__segment-glow {
+  opacity: 0.5;
+  filter: url(#ambientGlow);
+}
+
+.lobby__segment--active .lobby__segment-shadow {
+  opacity: 0.6;
 }
 
 .lobby__segment--active .lobby__segment-stroke {
   opacity: 1;
-  stroke-width: 1.5;
-  filter: url(#stroke3D);
+  stroke-width: 2.5;
+  filter: url(#activeEmboss);
+}
+
+.lobby__segment--active .lobby__segment-highlight {
+  opacity: 0.7;
 }
 
 .lobby__segment--locked {
@@ -660,12 +698,19 @@ onUnmounted(() => {
 }
 
 .lobby__segment--locked .lobby__segment-stroke {
-  stroke: var(--color-muted);
-  opacity: 0.2;
+  opacity: 0.15;
   filter: none;
 }
 
-.lobby__segment--locked .lobby__segment-feather {
+.lobby__segment--locked .lobby__segment-glow {
+  opacity: 0.05;
+}
+
+.lobby__segment--locked .lobby__segment-shadow {
+  opacity: 0.1;
+}
+
+.lobby__segment--locked .lobby__segment-highlight {
   opacity: 0.05;
 }
 
