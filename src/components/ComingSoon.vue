@@ -53,7 +53,7 @@
   font-weight: 700;
   letter-spacing: 0.3em;
   color: #f0f0f0;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-display);
 }
 
 .divider {

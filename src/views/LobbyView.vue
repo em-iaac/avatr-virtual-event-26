@@ -447,7 +447,7 @@ function initParticles() {
       oy: Math.random() * window.innerHeight,
       speed: Math.random() * 0.0004 + 0.0001,
       phase: Math.random() * Math.PI * 2,
-      opacity: Math.random() * 0.3 + 0.05,
+      opacity: Math.random() * 0.45 + 0.12,
     })
   }
 
@@ -471,8 +471,8 @@ function initParticles() {
           ctx.beginPath()
           ctx.moveTo(p.x, p.y)
           ctx.lineTo(q.x, q.y)
-          ctx.strokeStyle = `rgba(200,169,110,${0.04 * (1 - dist / 120)})`
-          ctx.lineWidth = 0.5
+          ctx.strokeStyle = `rgba(200,169,110,${0.09 * (1 - dist / 120)})`
+          ctx.lineWidth = 0.6
           ctx.stroke()
         }
       }
@@ -480,7 +480,7 @@ function initParticles() {
       ctx.beginPath()
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
       const glow = Math.sin(t * p.speed * 200 + p.phase) * 0.5 + 0.5
-      ctx.fillStyle = `rgba(200,169,110,${p.opacity * 0.5 + glow * p.opacity * 0.5})`
+      ctx.fillStyle = `rgba(200,169,110,${p.opacity * 0.6 + glow * p.opacity * 0.4})`
       ctx.fill()
     }
   }
@@ -526,18 +526,18 @@ onUnmounted(() => {
 .lobby__glow--center {
   top: 40%;
   left: 50%;
-  width: 900px;
-  height: 900px;
+  width: 1000px;
+  height: 1000px;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, rgba(200,169,110,0.02) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(200,169,110,0.14) 0%, rgba(200,169,110,0.06) 35%, rgba(200,169,110,0.02) 55%, transparent 75%);
   animation: goldBreathe 8s ease-in-out infinite;
 }
 .lobby__glow--edge {
   bottom: -20%;
   right: -15%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(180,210,255,0.025) 0%, transparent 70%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(180,210,255,0.05) 0%, rgba(180,210,255,0.02) 40%, transparent 70%);
 }
 
 .lobby__particles {
@@ -615,6 +615,21 @@ onUnmounted(() => {
   z-index: 2;
   width: clamp(260px, 40vw, 400px);
   flex-shrink: 0;
+}
+
+/* Cast shadow beneath the emblem */
+.lobby__floorplan::after {
+  content: '';
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 30px;
+  background: radial-gradient(ellipse at center, rgba(200, 169, 110, 0.12) 0%, rgba(0, 0, 0, 0.15) 30%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(10px);
+  pointer-events: none;
 }
 
 .lobby__emblem-svg {
