@@ -1,6 +1,6 @@
 # AVATR Virtual Event 2026
 
-A luxury automotive virtual event platform for the AVATR brand — designed as an immersive, room-based digital experience leading up to a live premiere on **May 1, 2026 at 8:00 PM (Kuwait, GMT+3)**.
+A luxury automotive virtual event platform for the AVATR brand — designed as an immersive, room-based digital experience leading up to a live premiere on **August 1, 2026 at 6:00 PM (Kuwait, GMT+3)**.
 
 **Live Site:** [https://hi-em.github.io/avatr-virtual-event-26/](https://hi-em.github.io/avatr-virtual-event-26/)  
 **Local Dev:** `http://localhost:5173/avatr-virtual-event-26/`

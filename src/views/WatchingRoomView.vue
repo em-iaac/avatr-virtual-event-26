@@ -6,7 +6,7 @@
         <div class="watching-room__ambience"></div>
         <img :src="emblemWhite" alt="" class="watching-room__emblem" />
         <h2 class="watching-room__title">The Premiere</h2>
-        <p class="watching-room__subtitle">The curtains rise on May 1st.</p>
+        <p class="watching-room__subtitle">The curtains rise on August 1st.</p>
         <CountdownTimer class="watching-room__countdown" @complete="onPhaseChange" />
         <div class="watching-room__placeholder glass-panel glass-panel--deep">
           <div class="watching-room__screen">

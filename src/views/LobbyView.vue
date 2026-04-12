@@ -32,13 +32,73 @@
           <filter id="frostedLock" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="6" />
           </filter>
+
+          <!-- Feathered glow behind strokes -->
+          <filter id="strokeGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+            <feColorMatrix in="blur" type="matrix"
+              values="1 0 0 0 0
+                      0 0.85 0 0 0
+                      0 0 0.55 0 0
+                      0 0 0 0.6 0" result="gold" />
+            <feMerge>
+              <feMergeNode in="gold" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          <!-- Outer wide feather for ambient depth -->
+          <filter id="strokeFeather" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="wide" />
+            <feColorMatrix in="wide" type="matrix"
+              values="1 0 0 0 0
+                      0 0.85 0 0 0
+                      0 0 0.55 0 0
+                      0 0 0 0.25 0" />
+          </filter>
+
+          <!-- 3D bevel lighting on strokes -->
+          <filter id="bevel3D" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blurAlpha" />
+            <feSpecularLighting in="blurAlpha" surfaceScale="4" specularConstant="0.8" specularExponent="20" result="spec">
+              <fePointLight x="200" y="100" z="200" />
+            </feSpecularLighting>
+            <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClip" />
+            <feComposite in="SourceGraphic" in2="specClip" operator="arithmetic" k1="0" k2="1" k3="0.4" k4="0" />
+          </filter>
+
+          <!-- Combined 3D stroke: glow + bevel -->
+          <filter id="stroke3D" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="glow" />
+            <feColorMatrix in="glow" type="matrix"
+              values="1 0 0 0 0
+                      0 0.85 0 0 0
+                      0 0 0.55 0 0
+                      0 0 0 0.5 0" result="goldGlow" />
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blurA" />
+            <feSpecularLighting in="blurA" surfaceScale="3" specularConstant="0.6" specularExponent="16" result="light">
+              <fePointLight x="200" y="80" z="180" />
+            </feSpecularLighting>
+            <feComposite in="light" in2="SourceAlpha" operator="in" result="litEdge" />
+            <feMerge>
+              <feMergeNode in="goldGlow" />
+              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="litEdge" />
+            </feMerge>
+          </filter>
         </defs>
 
+        <!-- Outer rectangle — deep feather layer -->
+        <rect
+          x="60" y="40" width="280" height="480" rx="4"
+          stroke="var(--color-accent)" stroke-width="2" fill="none"
+          opacity="0.3" filter="url(#strokeFeather)"
+        />
         <!-- Outer rectangle (structural frame) -->
         <rect
           x="60" y="40" width="280" height="480" rx="4"
           stroke="var(--color-accent)" stroke-width="1.5" fill="none"
-          opacity="0.4"
+          opacity="0.5" filter="url(#strokeGlow)"
         />
 
         <!-- Top triangle segment → Reveal Room -->
@@ -52,6 +112,12 @@
           <path
             d="M 60 40 L 200 456 L 340 40 Z"
             class="lobby__segment-fill"
+          />
+          <!-- Feather layer -->
+          <path
+            d="M 60 40 L 200 456 L 340 40"
+            stroke="var(--color-accent)" stroke-width="2" fill="none"
+            class="lobby__segment-feather"
           />
           <path
             d="M 60 40 L 200 456 L 340 40"
@@ -79,6 +145,12 @@
             d="M 60 40 L 200 456 L 60 520 Z"
             class="lobby__segment-fill"
           />
+          <!-- Feather layer -->
+          <path
+            d="M 60 40 L 200 456 L 60 520"
+            stroke="var(--color-accent)" stroke-width="2" fill="none"
+            class="lobby__segment-feather"
+          />
           <path
             d="M 60 40 L 200 456 L 60 520"
             stroke="var(--color-accent)" stroke-width="1.5" fill="none"
@@ -104,6 +176,12 @@
           <path
             d="M 340 40 L 200 456 L 340 520 Z"
             class="lobby__segment-fill"
+          />
+          <!-- Feather layer -->
+          <path
+            d="M 340 40 L 200 456 L 340 520"
+            stroke="var(--color-accent)" stroke-width="2" fill="none"
+            class="lobby__segment-feather"
           />
           <path
             d="M 340 40 L 200 456 L 340 520"
@@ -145,6 +223,11 @@
             />
             <path
               d="M 60 520 L 200 456 L 340 520"
+              stroke="var(--color-accent)" stroke-width="2" fill="none"
+              class="lobby__segment-feather"
+            />
+            <path
+              d="M 60 520 L 200 456 L 340 520"
               stroke="var(--color-accent)" stroke-width="1.5" fill="none"
               class="lobby__segment-stroke"
             />
@@ -154,6 +237,11 @@
             <path
               d="M 60 520 L 200 456 L 340 520 Z"
               class="lobby__segment-fill"
+            />
+            <path
+              d="M 60 520 L 200 456 L 340 520"
+              stroke="var(--color-accent)" stroke-width="2" fill="none"
+              class="lobby__segment-feather"
             />
             <path
               d="M 60 520 L 200 456 L 340 520"
@@ -217,7 +305,7 @@
 
     <!-- Footer tagline -->
     <div class="lobby__footer">
-      <p class="lobby__footer-text">Premiering May 1, 2026 · 8:00 PM Kuwait</p>
+      <p class="lobby__footer-text">Premiering August 1, 2026 · 6:00 PM Kuwait</p>
     </div>
 
     <!-- Lock Modal -->
@@ -468,6 +556,8 @@ onUnmounted(() => {
 .lobby__logo {
   height: clamp(28px, 5vw, 42px);
   width: auto;
+  filter: drop-shadow(0 0 12px rgba(200, 169, 110, 0.15))
+          drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 .lobby__subtitle {
@@ -517,6 +607,8 @@ onUnmounted(() => {
 .lobby__emblem-svg {
   width: 100%;
   height: auto;
+  filter: drop-shadow(0 0 24px rgba(200, 169, 110, 0.08))
+          drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 /* Segments */
@@ -531,18 +623,32 @@ onUnmounted(() => {
   transition: fill 0.4s ease;
 }
 
+/* Feathered glow layer behind each stroke */
+.lobby__segment-feather {
+  opacity: 0.15;
+  filter: url(#strokeFeather);
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
 .lobby__segment-stroke {
   opacity: 0.4;
-  transition: opacity 0.3s ease, stroke-width 0.3s ease;
+  filter: url(#strokeGlow);
+  transition: opacity 0.3s ease, stroke-width 0.3s ease, filter 0.4s ease;
 }
 
 .lobby__segment--active .lobby__segment-fill {
   fill: rgba(200, 169, 110, 0.08);
 }
 
+.lobby__segment--active .lobby__segment-feather {
+  opacity: 0.35;
+}
+
 .lobby__segment--active .lobby__segment-stroke {
   opacity: 1;
   stroke-width: 1.5;
+  filter: url(#stroke3D);
 }
 
 .lobby__segment--locked {
@@ -556,6 +662,11 @@ onUnmounted(() => {
 .lobby__segment--locked .lobby__segment-stroke {
   stroke: var(--color-muted);
   opacity: 0.2;
+  filter: none;
+}
+
+.lobby__segment--locked .lobby__segment-feather {
+  opacity: 0.05;
 }
 
 .lobby__segment--locked .lobby__room-label {

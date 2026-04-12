@@ -44,12 +44,12 @@
         <div class="invite__details">
           <div class="invite__detail">
             <span class="invite__detail-label">Date</span>
-            <span class="invite__detail-value">May 1, 2026</span>
+            <span class="invite__detail-value">August 1, 2026</span>
           </div>
           <div class="invite__detail-sep"></div>
           <div class="invite__detail">
             <span class="invite__detail-label">Time</span>
-            <span class="invite__detail-value">8:00 PM KWT</span>
+            <span class="invite__detail-value">6:00 PM KWT</span>
           </div>
         </div>
 
@@ -219,7 +219,7 @@ async function handleShare() {
       await navigator.share({
         files: [file],
         title: 'AVATR Virtual Event 2026',
-        text: 'You\'re invited to the AVATR Virtual Event — May 1, 2026',
+        text: 'You\'re invited to the AVATR Virtual Event — August 1, 2026',
       })
       shareLabel.value = 'Shared! ✓'
     } else {

@@ -84,12 +84,12 @@
             <div class="signup__invite-details">
               <div class="signup__invite-detail">
                 <span class="signup__invite-detail-label">Date</span>
-                <span class="signup__invite-detail-value">May 1, 2026</span>
+                <span class="signup__invite-detail-value">August 1, 2026</span>
               </div>
               <div class="signup__invite-divider-v"></div>
               <div class="signup__invite-detail">
                 <span class="signup__invite-detail-label">Time</span>
-                <span class="signup__invite-detail-value">8:00 PM KWT</span>
+                <span class="signup__invite-detail-value">6:00 PM KWT</span>
               </div>
               <div class="signup__invite-divider-v"></div>
               <div class="signup__invite-detail">
@@ -157,7 +157,7 @@ const BASE_COUNT = 1247
 const DAILY_GROWTH = 38
 
 function getEstimatedCount() {
-  const launchDate = new Date('2026-04-01')
+  const launchDate = new Date('2026-07-01')
   const daysSinceLaunch = Math.max(0, Math.floor((Date.now() - launchDate.getTime()) / 86400000))
   return BASE_COUNT + daysSinceLaunch * DAILY_GROWTH
 }
@@ -199,7 +199,7 @@ async function handleSubmit() {
 }
 
 async function handleShare() {
-  const text = `${firstName.value} has a seat at the AVATR Virtual Event on May 1, 2026, 8:00 PM Kuwait. See you on YouTube Live.`
+  const text = `${firstName.value} has a seat at the AVATR Virtual Event on August 1, 2026, 6:00 PM Kuwait. See you on YouTube Live.`
   const url = window.location.href
 
   if (navigator.share) {

@@ -4,7 +4,7 @@ export const EVENT = {
   name: 'AVATR Virtual Event 2026',
   tagline: 'Emotional Intelligence. Motion in Delight.',
   subtag: 'An invitation to the future.',
-  date: new Date('2026-05-01T20:00:00+03:00'), // May 1, 2026, 8pm Kuwait (GMT+3)
+  date: new Date('2026-08-01T18:00:00+03:00'), // August 1, 2026, 6pm Kuwait (GMT+3)
   duration: 2 * 60 * 60 * 1000, // 2-hour live window
   videoId: 'dQw4w9WgXcQ', // Swap with real YouTube video ID before launch
 }
