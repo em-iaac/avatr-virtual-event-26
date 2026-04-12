@@ -2,7 +2,7 @@
 
 A luxury automotive virtual event platform for the AVATR brand — designed as an immersive, room-based digital experience leading up to a live premiere on **May 1, 2026 at 8:00 PM (Kuwait, GMT+3)**.
 
-**Live Site:** [https://em-iaac.github.io/avatr-virtual-event-26/](https://em-iaac.github.io/avatr-virtual-event-26/)  
+**Live Site:** [https://hi-em.github.io/avatr-virtual-event-26/](https://hi-em.github.io/avatr-virtual-event-26/)  
 **Local Dev:** `http://localhost:5173/avatr-virtual-event-26/`
 
 ---
@@ -176,12 +176,7 @@ npm run preview
 
 ## Deployment
 
-Deployed to **GitHub Pages** from the `gh-pages` branch. The Vite config sets `base: '/avatr-virtual-event-26/'` for correct asset paths.
-
-```bash
-npm run build
-# Push dist/ contents to gh-pages branch
-```
+Deployed to **GitHub Pages** via GitHub Actions. On every push to `master`, the workflow in `.github/workflows/deploy.yml` builds the project and deploys it automatically. The Vite config sets `base: '/avatr-virtual-event-26/'` for correct asset paths.
 
 ---
 
